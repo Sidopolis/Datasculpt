@@ -1,5 +1,0 @@
-[33m03e491c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove AWS credentials from code - use environment variables instead
-[33m23f5f0c[m Update dependencies and enhance Clerk integration; improved README setup instructions, refactored authentication routes, and enhanced AI assistant responses for business insights.
-[33me311a60[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m modifcation for ai
-[33m033178e[m Enhance Dashboard layout by adding a Quick Actions section below the Sidebar, improving user interaction. Removed the previous Quick Actions section and adjusted the layout for better organization of Stats Overview and Charts Section.
-[33m642d907[m Initial commit: DataSculpt - LUX Industries Dashboard
