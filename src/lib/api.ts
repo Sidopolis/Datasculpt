@@ -71,14 +71,19 @@ export class DataSculptAPI {
   // Bedrock API Integration
   static async generateSQLQuery(naturalLanguageQuery: string): Promise<BedrockResponse> {
     try {
-      const response = await apiClient.post('/bedrock/generate-sql', {
-        query: naturalLanguageQuery,
-        context: 'sales_data_analysis'
-      })
-      return response.data
+      // Call the Bedrock backend utility directly
+      const { callBedrock } = await import('./bedrockApi');
+      const bedrockRaw = await callBedrock(naturalLanguageQuery);
+      // Map Bedrock response to BedrockResponse type
+      return {
+        sqlQuery: bedrockRaw.sqlQuery || '',
+        explanation: bedrockRaw.explanation || '',
+        confidence: bedrockRaw.confidence || 1,
+        suggestedVisualization: bedrockRaw.suggestedVisualization
+      };
     } catch (error) {
-      console.error('Error generating SQL query:', error)
-      throw new Error('Failed to generate SQL query')
+      console.error('Error generating SQL query:', error);
+      throw new Error('Failed to generate SQL query');
     }
   }
 

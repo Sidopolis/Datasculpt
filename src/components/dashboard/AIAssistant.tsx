@@ -1,12 +1,16 @@
 import React, { useState } from 'react'
 import { MessageSquare, Send, Bot, User, Code } from 'lucide-react'
 
+import { DataSculptAPI, BedrockResponse } from '../../lib/api'
+
 interface Message {
-  id: string
-  type: 'user' | 'assistant'
-  content: string
-  sqlQuery?: string
-  timestamp: Date
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  sqlQuery?: string;
+  timestamp: Date;
+  status?: 'pending' | 'success' | 'error';
+  result?: Record<string, unknown>;
 }
 
 export const AIAssistant: React.FC = () => {
@@ -21,67 +25,7 @@ export const AIAssistant: React.FC = () => {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Mock AI responses based on common queries
-  const generateResponse = (query: string): { content: string; sqlQuery?: string } => {
-    const lowerQuery = query.toLowerCase()
-    
-    if (lowerQuery.includes('top products') || lowerQuery.includes('best selling')) {
-      return {
-        content: 'Here are the top-selling products based on total sales volume. The query retrieves product names with their total quantities sold.',
-        sqlQuery: `SELECT p.name, SUM(o.quantity) as total_sold, SUM(o.total_amount) as revenue
-FROM products p
-JOIN orders o ON p.id = o.product_id
-GROUP BY p.id, p.name
-ORDER BY total_sold DESC
-LIMIT 10;`
-      }
-    }
-    
-    if (lowerQuery.includes('revenue by state') || lowerQuery.includes('state wise revenue')) {
-      return {
-        content: 'This query shows the total revenue generated from each state, ordered by highest revenue first.',
-        sqlQuery: `SELECT state, SUM(total_amount) as revenue
-FROM orders
-GROUP BY state
-ORDER BY revenue DESC;`
-      }
-    }
-    
-    if (lowerQuery.includes('maharashtra') || lowerQuery.includes('mumbai')) {
-      return {
-        content: 'Here\'s the data specifically for Maharashtra state, showing products and their performance.',
-        sqlQuery: `SELECT p.name, SUM(o.quantity) as units_sold, SUM(o.total_amount) as revenue
-FROM products p
-JOIN orders o ON p.id = o.product_id
-WHERE o.state = 'Maharashtra'
-GROUP BY p.id, p.name
-ORDER BY revenue DESC;`
-      }
-    }
-    
-    if (lowerQuery.includes('total revenue') || lowerQuery.includes('total sales')) {
-      return {
-        content: 'This query calculates the total revenue across all orders and states.',
-        sqlQuery: `SELECT 
-  SUM(total_amount) as total_revenue,
-  COUNT(*) as total_orders,
-  AVG(total_amount) as avg_order_value
-FROM orders;`
-      }
-    }
-    
-    return {
-      content: 'I can help you analyze your sales data. Try asking about:\n• Top selling products\n• Revenue by state\n• Product performance in specific states\n• Total sales metrics',
-      sqlQuery: `-- Example: Get monthly revenue trend
-SELECT 
-  DATE_TRUNC('month', created_at) as month,
-  SUM(total_amount) as monthly_revenue
-FROM orders
-GROUP BY month
-ORDER BY month;`
-    }
-  }
-
+  // Use Bedrock for AI responses
   const handleSend = async () => {
     if (!input.trim()) return
 
@@ -96,21 +40,31 @@ ORDER BY month;`
     setInput('')
     setIsLoading(true)
 
-    // Simulate API delay
-    setTimeout(() => {
-      const response = generateResponse(input)
+    try {
+      const bedrockResponse: BedrockResponse = await DataSculptAPI.generateSQLQuery(input)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: response.content,
-        sqlQuery: response.sqlQuery,
-        timestamp: new Date()
+        content: bedrockResponse.explanation,
+        sqlQuery: bedrockResponse.sqlQuery,
+        timestamp: new Date(),
+        status: 'pending'
       }
-
       setMessages(prev => [...prev, assistantMessage])
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 2).toString(),
+        type: 'assistant',
+        content: 'I encountered an error while processing your request. Please try rephrasing your question.',
+        timestamp: new Date(),
+        status: 'error'
+      }])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
+
+  // ...existing code...
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
