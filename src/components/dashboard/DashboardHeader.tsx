@@ -1,13 +1,114 @@
-import React, { useState } from 'react'
-import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown, BarChart3, FileText, Database, PieChart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useClerk, useUser } from '@clerk/clerk-react'
 
 export const DashboardHeader: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const navigate = useNavigate()
+  const { signOut } = useClerk()
+  const { user } = useUser()
 
   const handleSignOut = async () => {
-    console.log('Sign out clicked')
+    try {
+      await signOut()
+      setIsProfileOpen(false)
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
+
+  const searchItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: BarChart3 },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+    { name: 'Reports', path: '/reports', icon: FileText },
+    { name: 'Data Management', path: '/data-management', icon: Database },
+    { name: 'Revenue Charts', path: '/dashboard', icon: PieChart },
+    { name: 'Sales Overview', path: '/dashboard', icon: BarChart3 },
+  ]
+
+  const filteredItems = searchItems.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    setShowSearchResults(e.target.value.length > 0)
+  }
+
+  const searchRef = useRef<HTMLDivElement>(null)
+  const notificationsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false)
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const handleSearchItemClick = (path: string) => {
+    navigate(path)
+    setSearchQuery('')
+    setShowSearchResults(false)
+  }
+
+  const handleProfileClick = () => {
+    navigate('/settings')
+    setIsProfileOpen(false)
+  }
+
+  const handleSettingsClick = () => {
+    navigate('/settings')
+    setIsProfileOpen(false)
+  }
+
+  // Live notifications data
+  const notifications = [
+    {
+      id: 1,
+      type: 'info',
+      title: 'New data available',
+      message: 'Your daily sales report is ready for review.',
+      time: '2 minutes ago',
+      color: 'bg-blue-500'
+    },
+    {
+      id: 2,
+      type: 'success',
+      title: 'Export completed',
+      message: 'Revenue report has been exported successfully.',
+      time: '1 hour ago',
+      color: 'bg-green-500'
+    },
+    {
+      id: 3,
+      type: 'warning',
+      title: 'Low inventory alert',
+      message: 'LUX Comfort Vest stock is running low.',
+      time: '3 hours ago',
+      color: 'bg-yellow-500'
+    },
+    {
+      id: 4,
+      type: 'info',
+      title: 'New user registered',
+      message: 'A new admin account has been created.',
+      time: '5 hours ago',
+      color: 'bg-blue-500'
+    }
+  ]
 
   return (
     <header className="bg-white border-b border-slate-200 px-6 py-4">
@@ -22,26 +123,57 @@ export const DashboardHeader: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="hidden md:flex items-center space-x-2 bg-slate-100 rounded-md px-3 py-2">
-            <Search className="w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search analytics, reports..."
-              className="bg-transparent border-none outline-none text-sm text-slate-700 placeholder-slate-500 w-64"
-            />
+          <div ref={searchRef} className="hidden md:flex relative">
+            <div className="flex items-center space-x-2 bg-slate-100 rounded-md px-3 py-2">
+              <Search className="w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search analytics, reports..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="bg-transparent border-none outline-none text-sm text-slate-700 placeholder-slate-500 w-64"
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && filteredItems.length > 0 && (
+              <div className="absolute top-full left-0 mt-1 w-80 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
+                <div className="py-2">
+                  {filteredItems.map((item, index) => {
+                    const IconComponent = item.icon
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleSearchItemClick(item.path)}
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                      >
+                        <IconComponent className="w-4 h-4 text-slate-500" />
+                        <span>{item.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right side - Notifications and Profile */}
         <div className="flex items-center space-x-3">
           {/* Notifications */}
-          <div className="relative">
+          <div ref={notificationsRef} className="relative">
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors duration-200"
+              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors duration-200 relative"
             >
               <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs text-white font-medium">
+                    {notifications.length > 9 ? '9+' : notifications.length}
+                  </span>
+                </span>
+              )}
             </button>
 
             {/* Notifications Dropdown */}
@@ -49,28 +181,26 @@ export const DashboardHeader: React.FC = () => {
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
                 <div className="p-4 border-b border-slate-100">
                   <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+                  <p className="text-xs text-slate-500">{notifications.length} new notifications</p>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  <div className="p-4 hover:bg-slate-50 border-b border-slate-100">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">New data available</p>
-                        <p className="text-xs text-slate-600 mt-1">Your daily sales report is ready for review.</p>
-                        <p className="text-xs text-slate-400 mt-1">2 minutes ago</p>
+                  {notifications.map((notification) => (
+                    <div key={notification.id} className="p-4 hover:bg-slate-50 border-b border-slate-100 last:border-b-0">
+                      <div className="flex items-start space-x-3">
+                        <div className={`w-2 h-2 ${notification.color} rounded-full mt-2`}></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-900">{notification.title}</p>
+                          <p className="text-xs text-slate-600 mt-1">{notification.message}</p>
+                          <p className="text-xs text-slate-400 mt-1">{notification.time}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="p-4 hover:bg-slate-50">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">Export completed</p>
-                        <p className="text-xs text-slate-600 mt-1">Revenue report has been exported successfully.</p>
-                        <p className="text-xs text-slate-400 mt-1">1 hour ago</p>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
+                </div>
+                <div className="p-3 border-t border-slate-100">
+                  <button className="w-full text-xs text-slate-600 hover:text-slate-900 text-center">
+                    Mark all as read
+                  </button>
                 </div>
               </div>
             )}
@@ -87,7 +217,7 @@ export const DashboardHeader: React.FC = () => {
               </div>
               <div className="hidden md:block text-left">
                 <p className="text-sm font-medium text-slate-900">
-                  Demo User
+                  {user?.firstName || user?.username || 'Demo User'}
                 </p>
                 <p className="text-xs text-slate-500">Admin</p>
               </div>
@@ -99,16 +229,22 @@ export const DashboardHeader: React.FC = () => {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
                 <div className="p-4 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-900">
-                    Demo User
+                    {user?.firstName || user?.username || 'Demo User'}
                   </p>
-                  <p className="text-xs text-slate-500">demo@datasculpt.com</p>
+                  <p className="text-xs text-slate-500">{user?.emailAddresses[0]?.emailAddress || 'demo@datasculpt.com'}</p>
                 </div>
                 <div className="py-2">
-                  <button className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200">
+                  <button 
+                    onClick={handleProfileClick}
+                    className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                  >
                     <User className="w-4 h-4" />
                     <span>Profile</span>
                   </button>
-                  <button className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200">
+                  <button 
+                    onClick={handleSettingsClick}
+                    className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
+                  >
                     <Settings className="w-4 h-4" />
                     <span>Settings</span>
                   </button>
