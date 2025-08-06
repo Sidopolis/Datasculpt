@@ -3,7 +3,7 @@ import cors from 'cors';
 import { Client } from 'pg';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -11,11 +11,11 @@ app.use(express.json());
 
 // PostgreSQL connection
 const dbConfig = {
-  host: 'ec2-3-237-189-104.compute-1.amazonaws.com',
-  port: 5432,
-  database: 'postgres',
-  user: 'postgres',
-  password: 'secure123',
+  host: process.env.DB_HOST || 'ec2-3-237-189-104.compute-1.amazonaws.com',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'postgres',
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'secure123',
 };
 
 // API endpoint to execute SQL queries
