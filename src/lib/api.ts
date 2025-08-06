@@ -114,7 +114,7 @@ export class DataSculptAPI {
     try {
       console.log('Executing SQL query via backend:', sqlQuery);
       
-      const response = await fetch('http://localhost:3001/api/execute-query', {
+      const response = await fetch(`${API_BASE_URL}/execute-query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ export class DataSculptAPI {
       console.log('Fetching real dashboard data from PostgreSQL...')
       
       // Fetch real data from PostgreSQL via backend
-      const response = await fetch('http://localhost:3001/api/dashboard-data', {
+      const response = await fetch(`${API_BASE_URL}/dashboard-data`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
