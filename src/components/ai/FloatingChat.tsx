@@ -1,30 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageSquare, Send, Bot, User, X, Minimize2 } from 'lucide-react'
-import { DataSculptAPI, BedrockResponse } from '../../lib/api'
+import { MessageSquare, X, Send, Plus, Move } from 'lucide-react'
+import { callBedrockFloatingChat, BedrockFloatingChatResponse } from '../../lib/bedrockFloatingChat'
 
 interface Message {
   id: string
-  type: 'user' | 'assistant' | 'system'
   content: string
-  sqlQuery?: string
+  isUser: boolean
   timestamp: Date
-  status?: 'pending' | 'success' | 'error'
-  result?: Record<string, unknown>
 }
 
-export const FloatingChat: React.FC = () => {
+export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      type: 'assistant',
-      content: 'Hello! I\'m your LUX Industries AI assistant. Ask me about sales, products, or any data analysis.',
+      content: "Hello! I'm your LUX Industries business assistant. How can I help you with product information, business guidance, or customer support today?",
+      isUser: false,
       timestamp: new Date()
     }
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatRef = useRef<HTMLDivElement>(null)
+  const [chatSize, setChatSize] = useState({ width: 400, height: 600 })
+  const [isResizing, setIsResizing] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -39,8 +41,8 @@ export const FloatingChat: React.FC = () => {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user',
       content: input,
+      isUser: true,
       timestamp: new Date()
     }
 
@@ -49,39 +51,24 @@ export const FloatingChat: React.FC = () => {
     setIsLoading(true)
 
     try {
-      // Generate SQL query using Bedrock API
-      const bedrockResponse: BedrockResponse = await DataSculptAPI.generateSQLQuery(input)
+      const bedrockResponse: BedrockFloatingChatResponse = await callBedrockFloatingChat(input)
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: bedrockResponse.explanation,
-        sqlQuery: bedrockResponse.sqlQuery,
-        timestamp: new Date(),
-        status: 'pending'
+        content: bedrockResponse.message,
+        isUser: false,
+        timestamp: new Date()
       }
 
       setMessages(prev => [...prev, assistantMessage])
-
-      // Execute the SQL query
-      const result = await DataSculptAPI.verifyAndExecuteSQL(bedrockResponse.sqlQuery)
-      
-      // Update the message with results
-      setMessages(prev => prev.map(msg => 
-        msg.id === assistantMessage.id 
-          ? { ...msg, status: 'success', result }
-          : msg
-      ))
-
     } catch (error) {
-      console.error('Error processing query:', error)
+      console.error('Error calling Bedrock:', error)
       
       const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
-        type: 'assistant',
-        content: 'I encountered an error while processing your request. Please try rephrasing your question.',
-        timestamp: new Date(),
-        status: 'error'
+        id: (Date.now() + 1).toString(),
+        content: "I apologize, but I'm having trouble connecting right now. Please try again in a moment.",
+        isUser: false,
+        timestamp: new Date()
       }
 
       setMessages(prev => [...prev, errorMessage])
@@ -97,134 +84,201 @@ export const FloatingChat: React.FC = () => {
     }
   }
 
-  const renderMessage = (message: Message) => {
-    const isUser = message.type === 'user'
-    
-    return (
-      <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-          isUser 
-            ? 'bg-red-600 text-white' 
-            : 'bg-gray-100 text-gray-900'
-        }`}>
-          <div className="flex items-start space-x-2">
-            {message.type === 'assistant' && <Bot className="w-3 h-3 mt-0.5 flex-shrink-0" />}
-            {message.type === 'user' && <User className="w-3 h-3 mt-0.5 flex-shrink-0" />}
-            <div className="flex-1">
-              <p className="whitespace-pre-line">{message.content}</p>
-              
-              {message.sqlQuery && (
-                <div className="mt-2 p-2 bg-gray-800 rounded text-xs font-mono text-green-400 overflow-x-auto">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-400">SQL Query:</span>
-                    {message.status === 'success' && (
-                      <span className="text-green-400 text-xs">✓ Executed</span>
-                    )}
-                    {message.status === 'error' && (
-                      <span className="text-red-400 text-xs">✗ Error</span>
-                    )}
-                  </div>
-                  <pre className="whitespace-pre-wrap text-xs">{message.sqlQuery}</pre>
-                </div>
-              )}
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+    const startX = e.clientX
+    const startY = e.clientY
+    const startWidth = chatSize.width
+    const startHeight = chatSize.height
 
-              {message.result && (
-                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs">
-                  <div className="flex items-center mb-1">
-                    <span className="text-green-800 font-medium">Query Results</span>
-                  </div>
-                  <div className="text-green-700">
-                    <pre className="whitespace-pre-wrap text-xs">{JSON.stringify(message.result, null, 2)}</pre>
-                  </div>
-                </div>
-              )}
-            </div>
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - startX
+      const deltaY = e.clientY - startY
+      
+      setChatSize({
+        width: Math.max(300, Math.min(800, startWidth + deltaX)),
+        height: Math.max(400, Math.min(800, startHeight + deltaY))
+      })
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+
+  const handleDragStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+    const rect = chatRef.current?.getBoundingClientRect()
+    if (rect) {
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      })
+    }
+  }
+
+  const handleDragMove = (e: MouseEvent) => {
+    if (!isDragging) return
+    
+    const newX = e.clientX - dragOffset.x
+    const newY = e.clientY - dragOffset.y
+    
+    if (chatRef.current) {
+      chatRef.current.style.left = `${Math.max(0, Math.min(window.innerWidth - chatSize.width, newX))}px`
+      chatRef.current.style.top = `${Math.max(0, Math.min(window.innerHeight - chatSize.height, newY))}px`
+    }
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    document.removeEventListener('mousemove', handleDragMove)
+    document.removeEventListener('mouseup', handleDragEnd)
+  }
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleDragMove)
+      document.addEventListener('mouseup', handleDragEnd)
+    }
+  }, [isDragging, dragOffset])
+
+  const renderMessage = (message: Message) => {
+    const formattedContent = message.content
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>')
+
+    return (
+      <div
+        key={message.id}
+        className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}
+      >
+        <div
+          className={`max-w-[80%] rounded-lg px-4 py-2 ${
+            message.isUser
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          <div 
+            className="prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: formattedContent }}
+          />
+          <div className={`text-xs mt-1 ${message.isUser ? 'text-blue-100' : 'text-gray-500'}`}>
+            {message.timestamp.toLocaleTimeString()}
           </div>
         </div>
       </div>
     )
   }
 
+  if (!isOpen) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110"
+        >
+          <MessageSquare size={24} />
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <>
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-50"
+    <div className="fixed bottom-4 right-4 z-50">
+      <div
+        ref={chatRef}
+        className="bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden"
+        style={{
+          width: chatSize.width,
+          height: chatSize.height,
+          minWidth: 300,
+          minHeight: 400,
+          maxWidth: 800,
+          maxHeight: 800,
+          cursor: isResizing ? 'nw-resize' : 'default'
+        }}
       >
-        <MessageSquare className="w-5 h-5" />
-      </button>
+        {/* Header with Drag Handle */}
+        <div 
+          className="bg-blue-500 text-white px-4 py-3 flex items-center justify-between cursor-move"
+          onMouseDown={handleDragStart}
+        >
+          <div className="flex items-center space-x-2">
+            <Move size={16} className="text-blue-200" />
+            <MessageSquare size={20} />
+            <span className="font-semibold">LUX Industries Assistant</span>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-white hover:text-gray-200 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-      {/* Chat Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-96 h-[500px] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-red-600 rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">LUX</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900">AI Assistant</h3>
-                  <p className="text-xs text-gray-500">Powered by Bedrock</p>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 h-[calc(100%-120px)]">
+          {messages.map(renderMessage)}
+          {isLoading && (
+            <div className="flex justify-start mb-4">
+              <div className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  <span className="text-sm">Thinking...</span>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map(renderMessage)}
-              
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-900 max-w-xs px-3 py-2 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Bot className="w-3 h-3" />
-                      <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                      </div>
-                      <span className="text-xs text-gray-600">Processing...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about LUX data..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 text-sm"
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={isLoading || !input.trim()}
-                  className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+        {/* Input */}
+        <div className="border-t border-gray-200 p-4">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setInput('Tell me about LUX Industries products')}
+              className="text-gray-500 hover:text-blue-500 transition-colors"
+              title="Quick question"
+            >
+              <Plus size={16} />
+            </button>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about LUX Industries..."
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg p-2 transition-colors"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+          <div className="text-xs text-gray-500 mt-2 text-center">
+            Powered by AWS Bedrock Claude
           </div>
         </div>
-      )}
-    </>
+
+        {/* Resize Handle */}
+        <div
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-nw-resize bg-gray-300 hover:bg-gray-400 transition-colors"
+          onMouseDown={handleResizeStart}
+        />
+      </div>
+    </div>
   )
 } 

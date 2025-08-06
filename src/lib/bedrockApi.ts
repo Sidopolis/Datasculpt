@@ -66,20 +66,20 @@ export async function callBedrock(prompt: string) {
       "suggestedVisualization": "bar"
     }`;
 
-         const input = {
+  const input = {
        modelId: MODEL_ID,
-       contentType: 'application/json',
-       accept: 'application/json',
-               body: JSON.stringify({
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify({
           prompt: `${systemPrompt}\n\nUser query: ${prompt}\n\nPlease respond with valid JSON only.`,
           max_tokens_to_sample: 1000,
           temperature: 0.1
-        }),
-     };
+    }),
+  };
 
-    const command = new InvokeModelCommand(input);
-    const response = await client.send(command);
-    const responseBody = await response.body.transformToString();
+  const command = new InvokeModelCommand(input);
+  const response = await client.send(command);
+  const responseBody = await response.body.transformToString();
     const parsedResponse = JSON.parse(responseBody);
     
          console.log('Bedrock response:', parsedResponse);
