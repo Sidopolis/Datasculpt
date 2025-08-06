@@ -139,8 +139,24 @@ export class DataSculptAPI {
   // Get dashboard data
   static async getDashboardData(): Promise<DashboardData> {
     try {
-      const response = await apiClient.get('/dashboard/data')
-      return response.data
+      console.log('Fetching real dashboard data from PostgreSQL...')
+      
+      // Fetch real data from PostgreSQL via backend
+      const response = await fetch('http://localhost:3001/api/dashboard-data', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch dashboard data')
+      }
+
+      const result = await response.json()
+      console.log('Real dashboard data:', result)
+      return result
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       throw new Error('Failed to fetch dashboard data')

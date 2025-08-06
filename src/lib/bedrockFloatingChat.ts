@@ -1,9 +1,9 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
 
-const REGION = import.meta.env.VITE_AWS_REGION || 'ap-south-1'
+const REGION = import.meta.env.VITE_AWS_REGION || 'us-east-1'
 const ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID
 const SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-const MODEL_ID = 'anthropic.claude-3-sonnet-20240229-v1:0' // Use Claude instead of Nova Pro
+const MODEL_ID = import.meta.env.VITE_MODEL_ID || 'anthropic.claude-3-5-sonnet-20241022-v2:0'
 
 console.log('🔧 Bedrock Floating Chat Config:', {
   region: REGION,
@@ -26,7 +26,7 @@ export interface BedrockFloatingChatResponse {
 }
 
 export async function callBedrockFloatingChat(prompt: string): Promise<BedrockFloatingChatResponse> {
-  console.log('🔍 Calling Bedrock Claude for business guidance:', prompt)
+  console.log('🔍 Calling Bedrock Claude 3.5 Sonnet v2 for business guidance:', prompt)
   console.log('🔍 Using model:', MODEL_ID)
   console.log('🔍 Region:', REGION)
   
@@ -69,9 +69,12 @@ export async function callBedrockFloatingChat(prompt: string): Promise<BedrockFl
       contentType: 'application/json',
       accept: 'application/json',
       body: JSON.stringify({
-        prompt: `${systemPrompt}\n\nUser question: ${prompt}\n\nPlease provide a helpful business-focused response.`,
-        max_tokens_to_sample: 1000,
-        temperature: 0.1,
+        anthropic_version: 'bedrock-2023-05-31',
+        messages: [
+          { role: 'user', content: systemPrompt + '\n\n' + prompt }
+        ],
+        max_tokens: 1000,
+        temperature: 0.1
       }),
     }
 
@@ -84,8 +87,13 @@ export async function callBedrockFloatingChat(prompt: string): Promise<BedrockFl
     
     console.log('✅ Bedrock response:', parsedResponse)
     
-    // Extract the completion text from Claude response
-    const completion = parsedResponse.completion || ''
+    // Extract the assistant's reply from Claude Messages API
+    let completion = ''
+    if (parsedResponse.content && Array.isArray(parsedResponse.content) && parsedResponse.content[0]?.text) {
+      completion = parsedResponse.content[0].text
+    } else if (parsedResponse.completion) {
+      completion = parsedResponse.completion
+    }
     console.log('✅ Bedrock generated text:', completion)
 
     if (!completion) {

@@ -20,57 +20,12 @@ export const Dashboard: React.FC = () => {
     setLoading(true)
     setError(null)
     
-    // Create mock data as fallback
-    const mockData: DashboardData = {
-      totalRevenue: 125000,
-      totalOrders: 156,
-      totalProducts: 10,
-      avgOrderValue: 801,
-      revenueByState: [
-        { state: 'Kolkata', revenue: 55000 },
-        { state: 'Mumbai', revenue: 42000 },
-        { state: 'Delhi', revenue: 38000 },
-        { state: 'Chennai', revenue: 25000 }
-      ],
-      topProducts: [
-        { id: '1', name: 'LUX Innerwear Premium', totalSales: 45, revenue: 134955 },
-        { id: '2', name: 'LUX Comfort Vest', totalSales: 32, revenue: 511968 },
-        { id: '3', name: 'LUX Cotton Briefs', totalSales: 28, revenue: 50372 },
-        { id: '4', name: 'LUX Sportswear', totalSales: 25, revenue: 124975 },
-        { id: '5', name: 'LUX Nightwear', totalSales: 22, revenue: 28578 }
-      ],
-      charts: [
-        {
-          id: 'revenue-by-state',
-          title: 'Revenue by State',
-          type: 'bar',
-          data: [
-            { name: 'Kolkata', value: 55000 },
-            { name: 'Mumbai', value: 42000 },
-            { name: 'Delhi', value: 38000 },
-            { name: 'Chennai', value: 25000 }
-          ]
-        },
-        {
-          id: 'revenue-distribution',
-          title: 'Revenue Distribution',
-          type: 'pie',
-          data: [
-            { name: 'Kolkata', value: 34.4 },
-            { name: 'Mumbai', value: 26.3 },
-            { name: 'Delhi', value: 23.8 },
-            { name: 'Chennai', value: 15.6 }
-          ]
-        }
-      ]
-    }
-
     try {
       const apiData = await DataSculptAPI.getDashboardData()
       setData(apiData)
     } catch (error) {
-      console.warn('API not available, using mock data:', error)
-      setData(mockData)
+      console.error('Failed to fetch dashboard data:', error)
+      setError('Failed to load dashboard data. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -203,10 +158,13 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {data.charts.map((chart) => (
-                <ChartContainer key={chart.id} data={chart} />
-              ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {data.charts.map((chart) => (
+            <ChartContainer
+              key={chart.id}
+              data={chart}
+            />
+          ))}
         </div>
 
             {/* Top Products and Revenue by State - Side by Side */}
@@ -243,8 +201,8 @@ export const Dashboard: React.FC = () => {
               {/* State Summary */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
                 <div className="p-4 border-b border-slate-100">
-                  <h3 className="text-lg font-semibold text-slate-900">Revenue by State</h3>
-                  <p className="text-sm text-slate-600 mt-1">Top performing regions</p>
+                  <h3 className="text-lg font-semibold text-slate-900">Revenue by Brand</h3>
+                  <p className="text-sm text-slate-600 mt-1">Top performing brands</p>
                 </div>
                 <div className="p-4">
                   <div className="space-y-3">
