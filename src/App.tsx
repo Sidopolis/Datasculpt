@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ClerkProvider, SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react'
 import { Dashboard } from './components/dashboard/Dashboard'
-import { ReportPage } from './components/reports/ReportPage'
+import { ReportsPage } from './components/reports/ReportsPage'
 import { AnalyticsPage } from './components/analytics/AnalyticsPage'
 import { DataManagementPage } from './components/data/DataManagementPage'
 import { SettingsPage } from './components/settings/SettingsPage'
@@ -47,7 +47,7 @@ function App() {
             path="/reports"
             element={
               <SignedIn>
-                <ReportPage />
+                <ReportsPage />
               </SignedIn>
             }
           />

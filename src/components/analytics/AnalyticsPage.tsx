@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { DashboardHeader } from '../dashboard/DashboardHeader'
 import { Sidebar } from '../dashboard/Sidebar'
 import { ChartContainer } from '../charts/ChartContainer'
-import { TrendingUp, Users, Package, DollarSign, BarChart3, PieChart, LineChart } from 'lucide-react'
+import { TrendingUp, Users, Package, DollarSign, BarChart3, Download } from 'lucide-react'
+import { DataSculptAPI, downloadFile } from '../../lib/api'
 
 interface AnalyticsData {
   revenueTrend: {
@@ -137,13 +138,58 @@ export const AnalyticsPage: React.FC = () => {
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartContainer data={analyticsData.revenueTrend} />
-              <ChartContainer data={analyticsData.productPerformance} />
+              <div className="relative">
+                <ChartContainer data={analyticsData.revenueTrend} />
+                <button 
+                  onClick={async () => {
+                    try {
+                      const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.revenueTrend)
+                      downloadFile(csvBlob, 'revenue-trend.csv')
+                    } catch (error) {
+                      console.error('Download failed:', error)
+                    }
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <Download className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
+              <div className="relative">
+                <ChartContainer data={analyticsData.productPerformance} />
+                <button 
+                  onClick={async () => {
+                    try {
+                      const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.productPerformance)
+                      downloadFile(csvBlob, 'product-performance.csv')
+                    } catch (error) {
+                      console.error('Download failed:', error)
+                    }
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <Download className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
             </div>
 
             {/* Customer Segments */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ChartContainer data={analyticsData.customerSegments} />
+              <div className="relative">
+                <ChartContainer data={analyticsData.customerSegments} />
+                <button 
+                  onClick={async () => {
+                    try {
+                      const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.customerSegments)
+                      downloadFile(csvBlob, 'customer-segments.csv')
+                    } catch (error) {
+                      console.error('Download failed:', error)
+                    }
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  <Download className="w-4 h-4 text-slate-600" />
+                </button>
+              </div>
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Key Insights</h3>
                 <div className="space-y-4">
@@ -168,7 +214,22 @@ export const AnalyticsPage: React.FC = () => {
       case 'revenue':
         return (
           <div className="space-y-6">
-            <ChartContainer data={analyticsData.revenueTrend} />
+            <div className="relative">
+              <ChartContainer data={analyticsData.revenueTrend} />
+              <button 
+                onClick={async () => {
+                  try {
+                    const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.revenueTrend)
+                    downloadFile(csvBlob, 'revenue-analysis.csv')
+                  } catch (error) {
+                    console.error('Download failed:', error)
+                  }
+                }}
+                className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <Download className="w-4 h-4 text-slate-600" />
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Monthly Growth</h3>
@@ -192,7 +253,22 @@ export const AnalyticsPage: React.FC = () => {
       case 'products':
         return (
           <div className="space-y-6">
-            <ChartContainer data={analyticsData.productPerformance} />
+            <div className="relative">
+              <ChartContainer data={analyticsData.productPerformance} />
+              <button 
+                onClick={async () => {
+                  try {
+                    const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.productPerformance)
+                    downloadFile(csvBlob, 'product-performance.csv')
+                  } catch (error) {
+                    console.error('Download failed:', error)
+                  }
+                }}
+                className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <Download className="w-4 h-4 text-slate-600" />
+              </button>
+            </div>
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Product Analysis</h3>
               <div className="space-y-4">
@@ -220,7 +296,22 @@ export const AnalyticsPage: React.FC = () => {
       case 'customers':
         return (
           <div className="space-y-6">
-            <ChartContainer data={analyticsData.customerSegments} />
+            <div className="relative">
+              <ChartContainer data={analyticsData.customerSegments} />
+              <button 
+                onClick={async () => {
+                  try {
+                    const csvBlob = await DataSculptAPI.exportAsCSV(analyticsData.customerSegments)
+                    downloadFile(csvBlob, 'customer-insights.csv')
+                  } catch (error) {
+                    console.error('Download failed:', error)
+                  }
+                }}
+                className="absolute top-2 right-2 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <Download className="w-4 h-4 text-slate-600" />
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Demographics</h3>

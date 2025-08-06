@@ -1,0 +1,365 @@
+import React, { useState } from 'react'
+import { DashboardHeader } from '../dashboard/DashboardHeader'
+import { Sidebar } from '../dashboard/Sidebar'
+import { ArrowLeft, Download, Send, Bot, Plus, Search, Settings, MessageSquare } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { DataSculptAPI, downloadFile } from '../../lib/api'
+import { DataChart } from '../charts/DataChart'
+import { useUser } from '@clerk/clerk-react'
+
+interface Report {
+  id: string
+  title: string
+  type: string
+  status: 'generating' | 'completed' | 'error'
+  createdAt: Date
+  data?: Array<Record<string, unknown>>
+  sqlQuery?: string
+  explanation?: string
+  visualization?: string
+}
+
+export const ReportsPage: React.FC = () => {
+  const navigate = useNavigate()
+  const { user } = useUser()
+  const [prompt, setPrompt] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [reports, setReports] = useState<Report[]>([])
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+
+  const handleGenerateReport = async () => {
+    if (!prompt.trim() || isGenerating) return
+
+    setIsGenerating(true)
+    
+    try {
+      console.log('Generating SQL query for:', prompt)
+      
+      // Generate SQL query using Amazon Nova Pro
+      const sqlResponse = await DataSculptAPI.generateSQLQuery(prompt)
+      console.log('SQL Response:', sqlResponse)
+      
+      // Execute the SQL query
+      const queryResult = await DataSculptAPI.verifyAndExecuteSQL(sqlResponse.sqlQuery)
+      console.log('Query Result:', queryResult)
+      
+      // Create report with real data
+      const newReport: Report = {
+        id: Date.now().toString(),
+        title: prompt,
+        type: 'Custom',
+        status: 'completed',
+        createdAt: new Date(),
+        data: Array.isArray(queryResult.data) ? queryResult.data : [],
+        sqlQuery: sqlResponse.sqlQuery,
+        explanation: sqlResponse.explanation,
+        visualization: sqlResponse.suggestedVisualization
+      }
+      
+      console.log('Created report:', newReport)
+      setReports(prev => [newReport, ...prev])
+      setSelectedReport(newReport)
+      setPrompt('')
+    } catch (error) {
+      console.error('Error generating report:', error)
+      // Add error report
+      const errorReport: Report = {
+        id: Date.now().toString(),
+        title: prompt,
+        type: 'Error',
+        status: 'error',
+        createdAt: new Date()
+      }
+      setReports(prev => [errorReport, ...prev])
+      setSelectedReport(errorReport)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const quickActions = [
+    { title: 'Sales by Brand', prompt: 'Show total sales by brand' },
+    { title: 'Top Products', prompt: 'Show top 5 products by total sales amount' },
+    { title: 'Monthly Sales', prompt: 'Show monthly sales trend for the last 6 months' },
+    { title: 'Category Sales', prompt: 'Show sales by category' }
+  ]
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <DashboardHeader />
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-white border-b border-slate-200 p-6">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-semibold text-slate-900">AI Analytics Chat</h1>
+                <p className="text-slate-600">Ask questions about your data and get instant insights</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Chat Area */}
+          <div className="flex-1 flex bg-white">
+            {/* Left Sidebar - Chat History */}
+            <div className="w-80 bg-slate-50 border-r border-slate-200 flex flex-col">
+              {/* Top Actions */}
+              <div className="p-4 border-b border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                  <button className="p-2 hover:bg-slate-200 rounded-lg">
+                    <Search className="w-5 h-5 text-slate-600" />
+                  </button>
+                  <button className="p-2 hover:bg-slate-200 rounded-lg">
+                    <Settings className="w-5 h-5 text-slate-600" />
+                  </button>
+                </div>
+                                 <button 
+                   onClick={() => {
+                     setReports([])
+                     setSelectedReport(null)
+                     setPrompt('')
+                   }}
+                   className="w-full flex items-center space-x-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                 >
+                   <Plus className="w-4 h-4" />
+                   <span>New Chat</span>
+                 </button>
+              </div>
+
+              {/* Chat History */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <h3 className="text-sm font-medium text-slate-600 mb-3">Recent</h3>
+                <div className="space-y-2">
+                  {reports.map((report) => (
+                    <button
+                      key={report.id}
+                      onClick={() => setSelectedReport(report)}
+                      className={`w-full text-left p-3 rounded-lg transition-colors ${
+                        selectedReport?.id === report.id 
+                          ? 'bg-blue-50 text-blue-900 border border-blue-200' 
+                          : 'hover:bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <MessageSquare className="w-4 h-4" />
+                        <span className="text-sm truncate">
+                          {report.title.length > 30 ? report.title.substring(0, 30) + '...' : report.title}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col bg-white">
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {reports.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Bot className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                    <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                      Hello, {user?.firstName || user?.username || 'User'}
+                    </h2>
+                    <p className="text-slate-600">Ask me anything about your data</p>
+                  </div>
+                ) : (
+                  reports.map((report) => (
+                    <div key={report.id} className="space-y-4">
+                      {/* User Message */}
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-white">U</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-slate-900">{report.title}</p>
+                        </div>
+                      </div>
+
+                      {/* AI Response */}
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 space-y-4">
+                          {report.status === 'completed' && report.explanation && (
+                            <p className="text-slate-700">{report.explanation}</p>
+                          )}
+                          {report.status === 'error' && (
+                            <p className="text-red-600">Sorry, I couldn't generate that report. Please try rephrasing your question.</p>
+                          )}
+
+                          {/* Data Visualization */}
+                          {report.status === 'completed' && report.data && report.data.length > 0 && (
+                            <div className="space-y-4">
+                              {/* Chart Visualization */}
+                              {report.visualization && report.visualization !== 'table' && (
+                                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="font-medium text-slate-900">Chart Visualization</h4>
+                                    <span className="text-xs text-slate-500 capitalize">
+                                      {report.visualization} chart
+                                    </span>
+                                  </div>
+                                  <DataChart 
+                                    data={report.data}
+                                    type={report.visualization as 'bar' | 'line' | 'pie' | 'area'}
+                                    title={report.title}
+                                  />
+                                </div>
+                              )}
+                              
+                              {/* Data Table */}
+                              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className="font-medium text-slate-900">Data Table</h4>
+                                  <button 
+                                    onClick={async () => {
+                                      try {
+                                        const csvBlob = await DataSculptAPI.exportAsCSV({
+                                          id: report.id,
+                                          title: report.title,
+                                          type: (report.visualization as 'bar' | 'line' | 'pie' | 'area') || 'bar',
+                                          data: report.data || []
+                                        })
+                                        downloadFile(csvBlob, `${report.title}.csv`)
+                                      } catch (error) {
+                                        console.error('Download failed:', error)
+                                      }
+                                    }}
+                                    className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="border-b border-slate-200">
+                                        {report.data[0] && Object.keys(report.data[0]).map((key) => (
+                                          <th key={key} className="text-left py-2 px-3 font-medium text-slate-700">
+                                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                          </th>
+                                        ))}
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {report.data.slice(0, 5).map((row, index) => (
+                                        <tr key={index} className="border-b border-slate-100">
+                                          {Object.values(row).map((value, cellIndex) => (
+                                            <td key={cellIndex} className="py-2 px-3 text-slate-600">
+                                              {typeof value === 'number' ? value.toLocaleString() : String(value)}
+                                            </td>
+                                          ))}
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                  {report.data.length > 5 && (
+                                    <p className="text-xs text-slate-500 mt-2">Showing first 5 rows of {report.data.length} total results</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* SQL Query (for debugging) */}
+                          {report.status === 'completed' && report.sqlQuery && (
+                            <details className="mt-4">
+                              <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-700">
+                                View SQL Query
+                              </summary>
+                              <pre className="mt-2 p-3 bg-slate-100 rounded text-xs text-slate-700 overflow-x-auto border border-slate-200">
+                                {report.sqlQuery}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+
+                {/* Loading State */}
+                {isGenerating && (
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-slate-700">Analyzing your data...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div className="p-6 border-t border-slate-200 bg-white">
+                <div className="flex space-x-4">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Ask me anything about your data (e.g., 'Show me the best month where sales of particular items are high')"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      onKeyPress={(e) => e.key === 'Enter' && handleGenerateReport()}
+                    />
+                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                       <button 
+                         onClick={() => setPrompt('Show total sales by brand')}
+                         className="p-1 text-slate-400 hover:text-slate-600"
+                         title="Quick query: Sales by brand"
+                       >
+                         <Plus className="w-4 h-4" />
+                       </button>
+                       <button 
+                         onClick={() => setPrompt('Show top 5 products by sales')}
+                         className="p-1 text-slate-400 hover:text-slate-600"
+                         title="Quick query: Top products"
+                       >
+                         <MessageSquare className="w-4 h-4" />
+                       </button>
+                     </div>
+                  </div>
+                  <button
+                    onClick={handleGenerateReport}
+                    disabled={isGenerating || !prompt.trim()}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {quickActions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setPrompt(action.prompt)}
+                      className="p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors text-left text-sm text-slate-700 border border-slate-200"
+                    >
+                      {action.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+} 
