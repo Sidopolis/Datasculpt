@@ -2,6 +2,8 @@
 
 A modern analytics dashboard for LUX Industries, powered by real PostgreSQL data, AWS Bedrock AI (Claude), and Clerk authentication. Built with React, TypeScript, Tailwind CSS, and Node.js backend for secure database access.
 
+<!-- Updated for Vercel deployment with Railway backend -->
+
 ## Features
 - Natural language analytics chat (Claude 3.5 Sonnet v2 via Bedrock)
 - Real-time charts and business KPIs from your PostgreSQL database
