@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { DashboardHeader } from '../dashboard/DashboardHeader'
 import { Sidebar } from '../dashboard/Sidebar'
-import { User, Bell, Shield, Palette, Database, Globe, Key, Mail } from 'lucide-react'
+import { User, Bell, Shield, Database, Globe, Key, Mail, CheckCircle } from 'lucide-react'
+import { useUser } from '@clerk/clerk-react'
 
 interface SettingSection {
   id: string
@@ -11,6 +12,7 @@ interface SettingSection {
 }
 
 export const SettingsPage: React.FC = () => {
+  const { user } = useUser()
   const [activeTab, setActiveTab] = useState('profile')
   const [notifications, setNotifications] = useState({
     email: true,
@@ -19,12 +21,34 @@ export const SettingsPage: React.FC = () => {
     weekly: true,
     monthly: true
   })
+  
+  // Form states
+  const [profileForm, setProfileForm] = useState({
+    firstName: user?.firstName || 'Demo',
+    lastName: user?.lastName || 'User',
+    email: user?.emailAddresses[0]?.emailAddress || 'demo@datasculpt.com',
+    phone: '+91 98765 43210'
+  })
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  
+  const [mfaEnabled, setMfaEnabled] = useState(false)
+  const [showMfaSetup, setShowMfaSetup] = useState(false)
+  const [mfaCode, setMfaCode] = useState('')
+  
+  // Success/Error states
+  const [profileSuccess, setProfileSuccess] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [mfaSuccess, setMfaSuccess] = useState(false)
 
   const settingSections: SettingSection[] = [
     { id: 'profile', title: 'Profile Settings', description: 'Manage your account information', icon: User },
     { id: 'notifications', title: 'Notifications', description: 'Configure notification preferences', icon: Bell },
     { id: 'security', title: 'Security', description: 'Password and security settings', icon: Shield },
-    { id: 'preferences', title: 'Preferences', description: 'Appearance and behavior settings', icon: Palette },
     { id: 'integrations', title: 'Integrations', description: 'Connect external services', icon: Database },
     { id: 'regional', title: 'Regional', description: 'Language and timezone settings', icon: Globe }
   ]
@@ -34,6 +58,13 @@ export const SettingsPage: React.FC = () => {
       case 'profile':
         return (
           <div className="space-y-6">
+            {profileSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-green-800">Profile updated successfully!</span>
+              </div>
+            )}
+            
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Profile Information</h3>
               <div className="space-y-4">
@@ -50,23 +81,49 @@ export const SettingsPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">First Name</label>
-                    <input type="text" defaultValue="Demo" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input 
+                      type="text" 
+                      value={profileForm.firstName}
+                      onChange={(e) => setProfileForm({...profileForm, firstName: e.target.value})}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Last Name</label>
-                    <input type="text" defaultValue="User" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input 
+                      type="text" 
+                      value={profileForm.lastName}
+                      onChange={(e) => setProfileForm({...profileForm, lastName: e.target.value})}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                    <input type="email" defaultValue="demo@datasculpt.com" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input 
+                      type="email" 
+                      value={profileForm.email}
+                      onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
-                    <input type="tel" defaultValue="+91 98765 43210" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input 
+                      type="tel" 
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <button 
+                    onClick={() => {
+                      setProfileSuccess(true)
+                      setTimeout(() => setProfileSuccess(false), 3000)
+                    }}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
                     Save Changes
                   </button>
                 </div>
@@ -157,23 +214,61 @@ export const SettingsPage: React.FC = () => {
       case 'security':
         return (
           <div className="space-y-6">
+            {passwordSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-green-800">Password updated successfully!</span>
+              </div>
+            )}
+            
+            {mfaSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-green-800">Two-factor authentication enabled successfully!</span>
+              </div>
+            )}
+            
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Password Settings</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Current Password</label>
-                  <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input 
+                    type="password" 
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
-                  <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input 
+                    type="password" 
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Confirm New Password</label>
-                  <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input 
+                    type="password" 
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  />
                 </div>
                 <div className="flex justify-end">
-                  <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <button 
+                    onClick={() => {
+                      if (passwordForm.newPassword === passwordForm.confirmPassword && passwordForm.newPassword.length >= 8) {
+                        setPasswordSuccess(true)
+                        setPasswordForm({currentPassword: '', newPassword: '', confirmPassword: ''})
+                        setTimeout(() => setPasswordSuccess(false), 3000)
+                      }
+                    }}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
                     Update Password
                   </button>
                 </div>
@@ -183,18 +278,81 @@ export const SettingsPage: React.FC = () => {
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Two-Factor Authentication</h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Key className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="font-medium text-slate-900">Enable 2FA</p>
-                      <p className="text-sm text-slate-600">Add an extra layer of security</p>
+                {!mfaEnabled ? (
+                  <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <Key className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="font-medium text-slate-900">Enable 2FA</p>
+                        <p className="text-sm text-slate-600">Add an extra layer of security</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowMfaSetup(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Enable
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="font-medium text-slate-900">2FA Enabled</p>
+                        <p className="text-sm text-slate-600">Two-factor authentication is active</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setMfaEnabled(false)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Disable
+                    </button>
+                  </div>
+                )}
+                
+                {showMfaSetup && (
+                  <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+                    <h4 className="font-medium text-slate-900 mb-3">Setup 2FA</h4>
+                    <div className="space-y-3">
+                      <p className="text-sm text-slate-600">Enter the 6-digit code from your authenticator app:</p>
+                      <input 
+                        type="text" 
+                        maxLength={6}
+                        value={mfaCode}
+                        onChange={(e) => setMfaCode(e.target.value)}
+                        placeholder="000000"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      />
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => {
+                            if (mfaCode.length === 6) {
+                              setMfaEnabled(true)
+                              setShowMfaSetup(false)
+                              setMfaCode('')
+                              setMfaSuccess(true)
+                              setTimeout(() => setMfaSuccess(false), 3000)
+                            }
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Verify
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setShowMfaSetup(false)
+                            setMfaCode('')
+                          }}
+                          className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    Enable
-                  </button>
-                </div>
+                )}
               </div>
             </div>
 
@@ -220,58 +378,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         )
 
-      case 'preferences':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Appearance</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Theme</label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Light</option>
-                    <option>Dark</option>
-                    <option>System</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Language</label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>English</option>
-                    <option>Hindi</option>
-                    <option>Spanish</option>
-                  </select>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Dashboard Preferences</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-slate-900">Show Quick Actions</p>
-                    <p className="text-sm text-slate-600">Display quick action buttons</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-slate-900">Auto-refresh Data</p>
-                    <p className="text-sm text-slate-600">Automatically refresh dashboard data</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
 
       case 'integrations':
         return (

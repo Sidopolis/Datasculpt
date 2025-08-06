@@ -174,40 +174,40 @@ export const Dashboard: React.FC = () => {
         
         <main className="flex-1 p-4">
           <div className="space-y-4">
-            {/* Stats Overview */}
+        {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                title="Total Revenue"
-                value={`₹${data.totalRevenue.toLocaleString()}`}
-                change="+12.5%"
-                changeType="positive"
-                icon={TrendingUp}
-              />
-              <StatCard
-                title="Total Orders"
-                value={data.totalOrders.toLocaleString()}
-                change="+8.2%"
-                changeType="positive"
-                icon={ShoppingCart}
-              />
-              <StatCard
-                title="Products"
-                value={data.totalProducts}
-                icon={Package}
-              />
-              <StatCard
-                title="Avg Order Value"
-                value={`₹${Math.round(data.avgOrderValue).toLocaleString()}`}
-                icon={Users}
-              />
-            </div>
+          <StatCard
+            title="Total Revenue"
+            value={`₹${data.totalRevenue.toLocaleString()}`}
+            change="+12.5%"
+            changeType="positive"
+            icon={TrendingUp}
+          />
+          <StatCard
+            title="Total Orders"
+            value={data.totalOrders.toLocaleString()}
+            change="+8.2%"
+            changeType="positive"
+            icon={ShoppingCart}
+          />
+          <StatCard
+            title="Products"
+            value={data.totalProducts}
+            icon={Package}
+          />
+          <StatCard
+            title="Avg Order Value"
+            value={`₹${Math.round(data.avgOrderValue).toLocaleString()}`}
+            icon={Users}
+          />
+        </div>
 
-            {/* Charts Section */}
+        {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {data.charts.map((chart) => (
                 <ChartContainer key={chart.id} data={chart} />
               ))}
-            </div>
+        </div>
 
             {/* Top Products and Revenue by State - Side by Side */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -238,7 +238,7 @@ export const Dashboard: React.FC = () => {
                     ))}
                   </div>
                 </div>
-              </div>
+        </div>
 
               {/* State Summary */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
@@ -249,8 +249,8 @@ export const Dashboard: React.FC = () => {
                 <div className="p-4">
                   <div className="space-y-3">
                     {data.revenueByState.slice(0, 4).map((item, index) => {
-                      const share = (item.revenue / data.totalRevenue * 100).toFixed(1)
-                      return (
+                  const share = (item.revenue / data.totalRevenue * 100).toFixed(1)
+                  return (
                         <div key={item.state} className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm font-medium">
