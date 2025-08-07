@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts'
-import { FileText, FileSpreadsheet } from 'lucide-react'
+import { FileText, FileSpreadsheet, Loader } from 'lucide-react'
 import { DataSculptAPI, ChartData } from '../../lib/api'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface ChartContainerProps {
   data: ChartData
@@ -12,6 +13,7 @@ const COLORS = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4'
 
 export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className = '' }) => {
   const [isExporting, setIsExporting] = useState(false)
+  const { isDarkMode } = useTheme()
 
   const handleExport = async (format: 'pdf' | 'csv') => {
     setIsExporting(true)
@@ -44,40 +46,79 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className 
       margin: { top: 10, right: 40, left: 30, bottom: 20 }
     }
 
+    // Dark mode styling for chart components
+    const textColor = isDarkMode ? '#E2E8F0' : '#374151'
+    const gridColor = isDarkMode ? '#475569' : '#E5E7EB'
+    const axisColor = isDarkMode ? '#94A3B8' : '#6B7280'
+    const tooltipBg = isDarkMode ? '#1E293B' : '#FFFFFF'
+    const tooltipBorder = isDarkMode ? '1px solid #475569' : '1px solid #E5E7EB'
+    const tooltipLabel = { color: textColor, fontWeight: 600 }
+    const tooltipItem = { color: textColor }
+
     switch (data.type) {
       case 'bar':
         return (
           <BarChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <YAxis 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <Tooltip 
+              contentStyle={{ backgroundColor: tooltipBg, border: tooltipBorder, color: textColor }}
+              labelStyle={tooltipLabel}
+              itemStyle={tooltipItem}
+            />
             <Bar dataKey="value" fill="#3B82F6" />
           </BarChart>
         )
-      
       case 'line':
         return (
           <LineChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <YAxis 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <Tooltip 
+              contentStyle={{ backgroundColor: tooltipBg, border: tooltipBorder, color: textColor }}
+              labelStyle={tooltipLabel}
+              itemStyle={tooltipItem}
+            />
             <Line type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} />
           </LineChart>
         )
-      
       case 'area':
         return (
           <AreaChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <YAxis 
+              tick={{ fill: textColor, fontSize: 12 }}
+              axisLine={{ stroke: axisColor }}
+            />
+            <Tooltip 
+              contentStyle={{ backgroundColor: tooltipBg, border: tooltipBorder, color: textColor }}
+              labelStyle={tooltipLabel}
+              itemStyle={tooltipItem}
+            />
             <Area type="monotone" dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
           </AreaChart>
         )
-      
       case 'pie':
         return (
           <PieChart>
@@ -95,23 +136,26 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className 
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip 
+              contentStyle={{ backgroundColor: tooltipBg, border: tooltipBorder, color: textColor }}
+              labelStyle={tooltipLabel}
+              itemStyle={tooltipItem}
+            />
           </PieChart>
         )
-      
       default:
         return <div>Unsupported chart type</div>
     }
   }
 
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm ${className}`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-slate-700">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{data.title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{data.title}</h3>
           {data.config?.subtitle && (
-            <p className="text-sm text-gray-600 mt-1">{data.config.subtitle}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-300 mt-1">{data.config.subtitle}</p>
           )}
         </div>
         
@@ -120,7 +164,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className 
           <button
             onClick={() => handleExport('pdf')}
             disabled={isExporting}
-            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
@@ -128,7 +172,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className 
           <button
             onClick={() => handleExport('csv')}
             disabled={isExporting}
-            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>CSV</span>
@@ -145,11 +189,8 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({ data, className 
 
       {/* Loading overlay for export */}
       {isExporting && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-xl">
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-600">Exporting...</span>
-          </div>
+        <div className="absolute inset-0 bg-white dark:bg-slate-900 bg-opacity-60 flex items-center justify-center z-10">
+          <Loader className="w-6 h-6 animate-spin text-blue-600" />
         </div>
       )}
     </div>

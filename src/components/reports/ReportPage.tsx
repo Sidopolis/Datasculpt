@@ -30,6 +30,7 @@ export const ReportPage: React.FC = () => {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [currentReport, setCurrentReport] = useState<ReportData | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -42,22 +43,19 @@ export const ReportPage: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
-
+    setError(null)
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'user',
       content: input,
       timestamp: new Date()
     }
-
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsLoading(true)
-
     try {
       // Generate SQL query using Bedrock API
       const bedrockResponse: BedrockResponse = await DataSculptAPI.generateSQLQuery(input)
-      
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
@@ -66,12 +64,9 @@ export const ReportPage: React.FC = () => {
         timestamp: new Date(),
         status: 'pending'
       }
-
       setMessages(prev => [...prev, assistantMessage])
-
       // Execute the SQL query
       const result = await DataSculptAPI.verifyAndExecuteSQL(bedrockResponse.sqlQuery)
-      
       // Generate chart data and report
       const chartData = transformDataToChart(result, input)
       const reportData: ReportData = {
@@ -82,25 +77,22 @@ export const ReportPage: React.FC = () => {
         summary: generateSummary(result),
         generatedAt: new Date()
       }
-      
       setCurrentReport(reportData)
-      
       // Update the message with results
-      setMessages(prev => prev.map(msg => 
-        msg.id === assistantMessage.id 
-          ? { 
-              ...msg, 
-              status: 'success', 
+      setMessages(prev => prev.map(msg =>
+        msg.id === assistantMessage.id
+          ? {
+              ...msg,
+              status: 'success',
               result,
               chartData: chartData.data,
               chartType: chartData.type
             }
           : msg
       ))
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing query:', error)
-      
+      setError(error?.message || 'An error occurred while generating your report.')
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
         type: 'assistant',
@@ -108,7 +100,6 @@ export const ReportPage: React.FC = () => {
         timestamp: new Date(),
         status: 'error'
       }
-
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
@@ -258,7 +249,7 @@ export const ReportPage: React.FC = () => {
         <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
           isUser 
             ? 'bg-slate-900 text-white' 
-            : 'bg-white text-slate-900 border border-slate-200'
+            : 'bg-white text-slate-900 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'
         }`}>
           <div className="flex items-start space-x-2">
             {message.type === 'assistant' && <Bot className="w-4 h-4 mt-1 flex-shrink-0" />}
@@ -267,7 +258,7 @@ export const ReportPage: React.FC = () => {
               <p className="text-sm whitespace-pre-line">{message.content}</p>
               
               {message.chartData && message.chartType && (
-                <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                <div className="mt-3 p-3 bg-slate-50 rounded-lg dark:bg-slate-700">
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
                       {renderChart(message.chartData, message.chartType)}
@@ -283,27 +274,27 @@ export const ReportPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link 
                 to="/dashboard" 
-                className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm font-medium">Back to Dashboard</span>
               </Link>
-              <div className="h-6 w-px bg-slate-300"></div>
+              <div className="h-6 w-px bg-slate-300 dark:bg-slate-700"></div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-slate-900">Live Report Generator</h1>
-                  <p className="text-sm text-slate-600">AI-powered data analysis and visualization</p>
+                  <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Live Report Generator</h1>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">AI-powered data analysis and visualization</p>
                 </div>
               </div>
             </div>
@@ -311,14 +302,14 @@ export const ReportPage: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => handleDownloadReport('pdf')}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700"
                 >
                   <FileText className="w-4 h-4" />
                   <span>Export PDF</span>
                 </button>
                 <button
                   onClick={() => handleDownloadReport('csv')}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700"
                 >
                   <Download className="w-4 h-4" />
                   <span>Export CSV</span>
@@ -333,12 +324,12 @@ export const ReportPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Chat Interface */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm h-[600px] flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm h-[600px] flex flex-col">
               {/* Chat Header */}
-              <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-700">
                 <div className="flex items-center space-x-3">
                   <MessageSquare className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-slate-900">AI Assistant</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI Assistant</h3>
                   <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
                     Live
                   </span>
@@ -347,11 +338,22 @@ export const ReportPage: React.FC = () => {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.length === 0 && (
+                {error && (
+                  <div className="text-center text-red-500 bg-red-50 dark:bg-red-900 rounded p-4 mb-4">
+                    <p className="font-semibold">{error}</p>
+                  </div>
+                )}
+                {isLoading && !messages.length && (
+                  <div className="flex justify-center items-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 border-t-slate-600 dark:border-slate-700 dark:border-t-slate-200 mx-auto mb-3"></div>
+                    <span className="ml-2 text-slate-600 dark:text-slate-300">Loading...</span>
+                  </div>
+                )}
+                {messages.length === 0 && !isLoading && !error && (
                   <div className="text-center text-slate-500 py-12">
                     <Bot className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-                    <h3 className="text-lg font-medium text-slate-900 mb-2">Start Your Analysis</h3>
-                    <p className="text-sm text-slate-600 mb-4">Ask me to generate reports about your data</p>
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">Start Your Analysis</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">Ask me to generate reports about your data</p>
                     <div className="space-y-2 text-xs text-slate-500">
                       <p>• "Show revenue by state"</p>
                       <p>• "Generate trend analysis"</p>
@@ -363,9 +365,9 @@ export const ReportPage: React.FC = () => {
                 
                 {messages.map(renderMessage)}
                 
-                {isLoading && (
+                {isLoading && messages.length > 0 && (
                   <div className="flex justify-start">
-                    <div className="bg-white text-slate-900 max-w-xs lg:max-w-md px-4 py-3 rounded-lg border border-slate-200">
+                    <div className="bg-white text-slate-900 max-w-xs lg:max-w-md px-4 py-3 rounded-lg border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700">
                       <div className="flex items-center space-x-2">
                         <Bot className="w-4 h-4" />
                         <div className="flex space-x-1">
@@ -383,7 +385,7 @@ export const ReportPage: React.FC = () => {
               </div>
 
               {/* Input */}
-              <div className="p-6 border-t border-slate-100">
+              <div className="p-6 border-t border-slate-100 dark:border-slate-700">
                 <div className="flex space-x-3">
                   <input
                     type="text"
@@ -391,7 +393,7 @@ export const ReportPage: React.FC = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask for a report (e.g., 'Show revenue trends by month')"
-                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"
                     disabled={isLoading}
                   />
                   <button
@@ -409,61 +411,61 @@ export const ReportPage: React.FC = () => {
           {/* Report Preview */}
           <div className="space-y-6">
             {currentReport ? (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-900">Current Report</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Current Report</h3>
                   <span className="text-xs text-slate-500">{currentReport.generatedAt.toLocaleTimeString()}</span>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium text-slate-900 mb-2">{currentReport.title}</h4>
-                    <p className="text-xs text-slate-600">{currentReport.description}</p>
+                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">{currentReport.title}</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">{currentReport.description}</p>
                   </div>
-                  <div className="h-48 bg-slate-50 rounded-lg p-4">
+                  <div className="h-48 bg-slate-50 rounded-lg p-4 dark:bg-slate-700">
                     <ResponsiveContainer width="100%" height="100%">
                       {renderChart(currentReport.chartData, currentReport.chartType)}
                     </ResponsiveContainer>
                   </div>
-                  <div className="text-xs text-slate-600">
+                  <div className="text-xs text-slate-600 dark:text-slate-300">
                     <p>{currentReport.summary}</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
                 <div className="text-center text-slate-500">
                   <TrendingUp className="w-8 h-8 mx-auto mb-3 text-slate-400" />
-                  <h3 className="text-sm font-medium text-slate-900 mb-1">No Report Generated</h3>
-                  <p className="text-xs text-slate-600">Start a conversation to generate your first report</p>
+                  <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">No Report Generated</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">Start a conversation to generate your first report</p>
                 </div>
               </div>
             )}
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-sm font-semibold text-slate-900 mb-4">Quick Actions</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button 
                   onClick={() => setInput('Show revenue by state')}
-                  className="w-full text-left p-3 text-sm text-slate-700 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="w-full text-left p-3 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                 >
                   Revenue by State
                 </button>
                 <button 
                   onClick={() => setInput('Top performing products')}
-                  className="w-full text-left p-3 text-sm text-slate-700 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="w-full text-left p-3 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                 >
                   Top Products
                 </button>
                 <button 
                   onClick={() => setInput('Monthly sales trend')}
-                  className="w-full text-left p-3 text-sm text-slate-700 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="w-full text-left p-3 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                 >
                   Sales Trend
                 </button>
                 <button 
                   onClick={() => setInput('Customer distribution')}
-                  className="w-full text-left p-3 text-sm text-slate-700 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="w-full text-left p-3 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                 >
                   Customer Analysis
                 </button>

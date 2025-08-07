@@ -119,17 +119,17 @@ export const AnalyticsPage: React.FC = () => {
             {/* Top Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {analyticsData.topMetrics.map((metric, index) => (
-                <div key={index} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                <div key={index} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-600 mb-1">{metric.title}</p>
-                      <p className="text-2xl font-semibold text-slate-900">{metric.value}</p>
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">{metric.title}</p>
+                      <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{metric.value}</p>
                       <p className={`text-xs mt-1 ${metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
                         {metric.change}
                       </p>
                     </div>
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <metric.icon className="w-5 h-5 text-slate-600" />
+                    <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center">
+                      <metric.icon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                     </div>
                   </div>
                 </div>
@@ -190,20 +190,20 @@ export const AnalyticsPage: React.FC = () => {
                   <Download className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Key Insights</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Key Insights</h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <p className="text-sm text-slate-700">Revenue growth is consistent across all months</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300">Revenue growth is consistent across all months</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <p className="text-sm text-slate-700">Premium customers drive 45% of total revenue</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300">Premium customers drive 45% of total revenue</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <p className="text-sm text-slate-700">LUX Comfort Vest is the top performing product</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300">LUX Comfort Vest is the top performing product</p>
                   </div>
                 </div>
               </div>
@@ -231,20 +231,20 @@ export const AnalyticsPage: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Monthly Growth</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Monthly Growth</h3>
                 <p className="text-3xl font-bold text-green-600">+15.2%</p>
-                <p className="text-sm text-slate-600 mt-1">vs last month</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">vs last month</p>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Revenue Target</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Revenue Target</h3>
                 <p className="text-3xl font-bold text-blue-600">85%</p>
-                <p className="text-sm text-slate-600 mt-1">of annual goal</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">of annual goal</p>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Best Month</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Best Month</h3>
                 <p className="text-3xl font-bold text-purple-600">June</p>
-                <p className="text-sm text-slate-600 mt-1">₹68,000 revenue</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">₹68,000 revenue</p>
               </div>
             </div>
           </div>
@@ -269,18 +269,18 @@ export const AnalyticsPage: React.FC = () => {
                 <Download className="w-4 h-4 text-slate-600" />
               </button>
             </div>
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Product Analysis</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Product Analysis</h3>
               <div className="space-y-4">
                 {analyticsData.productPerformance.data.map((product, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center text-slate-600 text-sm font-medium">
+                      <div className="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 text-sm font-medium">
                         {index + 1}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">{product.name}</p>
-                        <p className="text-sm text-slate-600">₹{product.value.toLocaleString()}</p>
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{product.name}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">₹{product.value.toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -313,37 +313,37 @@ export const AnalyticsPage: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Demographics</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Customer Demographics</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Age 25-35</span>
-                    <span className="text-sm font-medium text-slate-900">45%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Age 25-35</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">45%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Age 36-45</span>
-                    <span className="text-sm font-medium text-slate-900">32%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Age 36-45</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">32%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Age 46+</span>
-                    <span className="text-sm font-medium text-slate-900">23%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Age 46+</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">23%</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Satisfaction</h3>
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Customer Satisfaction</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Very Satisfied</span>
-                    <span className="text-sm font-medium text-slate-900">78%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Very Satisfied</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">78%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Satisfied</span>
-                    <span className="text-sm font-medium text-slate-900">18%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Satisfied</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">18%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-slate-600">Neutral</span>
-                    <span className="text-sm font-medium text-slate-900">4%</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Neutral</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">4%</span>
                   </div>
                 </div>
               </div>
@@ -357,21 +357,21 @@ export const AnalyticsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <DashboardHeader />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-4">
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-slate-900 mb-2">Analytics Dashboard</h1>
-              <p className="text-slate-600">Comprehensive insights into your business performance</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+              <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Analytics Dashboard</h1>
+              <p className="text-slate-600 dark:text-slate-300">Comprehensive insights into your business performance</p>
             </div>
 
             {/* Tabs */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="border-b border-slate-200">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="border-b border-slate-200 dark:border-slate-700">
                 <nav className="flex space-x-8 px-6">
                   {tabs.map((tab) => (
                     <button
@@ -379,8 +379,8 @@ export const AnalyticsPage: React.FC = () => {
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                         activeTab === tab.id
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" />

@@ -193,23 +193,22 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <DashboardHeader />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-4">
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-slate-900 mb-2">Settings</h1>
-              <p className="text-slate-600">Manage your account preferences and configurations</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+              <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Settings</h1>
+              <p className="text-slate-600 dark:text-slate-300">Manage your account preferences and configurations</p>
             </div>
-
             {/* Settings Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Sidebar */}
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4">
                   <nav className="space-y-2">
                     {settingSections.map((section) => (
                       <button
@@ -217,21 +216,20 @@ export const SettingsPage: React.FC = () => {
                         onClick={() => setActiveTab(section.id)}
                         className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors ${
                           activeTab === section.id
-                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                            : 'text-slate-600 hover:bg-slate-50'
+                            ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
                         <section.icon className="w-5 h-5" />
                         <div>
                           <p className="font-medium text-sm">{section.title}</p>
-                          <p className="text-xs text-slate-500">{section.description}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{section.description}</p>
                         </div>
                       </button>
                     ))}
                   </nav>
                 </div>
               </div>
-
               {/* Content */}
               <div className="lg:col-span-3">
                 {renderTabContent()}

@@ -110,14 +110,14 @@ export const Sidebar: React.FC = () => {
           className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
             active
               ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-slate-100'
           } ${level > 0 ? 'ml-4' : ''}`}
         >
           <div className="flex items-center space-x-3">
-            <item.icon className={`w-4 h-4 ${active ? 'text-white' : 'text-gray-500'}`} />
+            <item.icon className={`w-4 h-4 ${active ? 'text-white' : 'text-gray-500 dark:text-slate-400'}`} />
             <span>{item.label}</span>
             {item.badge && (
-              <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+              <span className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full">
                 {item.badge}
               </span>
             )}
@@ -126,7 +126,7 @@ export const Sidebar: React.FC = () => {
             <ChevronRight 
               className={`w-4 h-4 transition-transform duration-200 ${
                 isExpanded ? 'rotate-90' : ''
-              }`} 
+              } ${active ? 'text-white' : 'text-gray-400 dark:text-slate-500'}`}
             />
           )}
         </button>
@@ -141,13 +141,11 @@ export const Sidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-full overflow-y-auto">
+    <aside className="w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 h-full overflow-y-auto">
       {/* Navigation */}
       <nav className="p-3 space-y-1">
         {menuItems.map(item => renderMenuItem(item))}
       </nav>
-
-
     </aside>
   )
 } 
