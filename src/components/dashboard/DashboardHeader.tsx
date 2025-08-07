@@ -219,10 +219,10 @@ export const DashboardHeader: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-2 p-2 text-slate-600 dark:text-slate-100 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 bg-white dark:bg-slate-800 rounded-md transition-colors duration-200"
+              className="flex items-center space-x-2 p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors duration-200"
             >
-              <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-slate-600 dark:text-slate-100" />
+              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-slate-600" />
               </div>
               <div className="hidden md:block text-left">
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
