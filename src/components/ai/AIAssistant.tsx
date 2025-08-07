@@ -13,26 +13,48 @@ interface Message {
 }
 
 export const AIAssistant: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: 'Hello! I\'m your AI data assistant. I can help you query your data using natural language. Try asking something like:\n\n• "Show top products in Maharashtra"\n• "What is the total revenue by state?"\n• "Which products are performing best?"\n• "Generate a revenue trend analysis"',
-      timestamp: new Date()
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const savedMessages = localStorage.getItem('chatMessages')
+    return savedMessages ? JSON.parse(savedMessages) : [
+      {
+        id: '1',
+        type: 'assistant',
+        content: 'Hello! I\'m your AI data assistant. I can help you query your data using natural language. Try asking something like:\n\n• "Show top products in Maharashtra"\n• "What is the total revenue by state?"\n• "Which products are performing best?"\n• "Generate a revenue trend analysis"',
+        timestamp: new Date()
+      }
+    ]
+  })
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExecuting, setIsExecuting] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Save messages to localStorage whenever they change
   useEffect(() => {
-    scrollToBottom()
+    localStorage.setItem('chatMessages', JSON.stringify(messages))
   }, [messages])
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      const { scrollHeight, clientHeight } = chatContainerRef.current
+      chatContainerRef.current.scrollTop = scrollHeight - clientHeight
+    }
+  }, [messages])
+
+  const handleNewChat = () => {
+    setMessages([{
+      id: '1',
+      type: 'assistant',
+      content: 'Hello! I\'m your AI data assistant. I can help you query your data using natural language. Try asking something like:\n\n• "Show top products in Maharashtra"\n• "What is the total revenue by state?"\n• "Which products are performing best?"\n• "Generate a revenue trend analysis"',
+      timestamp: new Date()
+    }])
+  }
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
@@ -202,10 +224,16 @@ export const AIAssistant: React.FC = () => {
             Powered by Bedrock
           </span>
         </div>
+        <button
+          onClick={handleNewChat}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        >
+          New Chat
+        </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map(renderMessage)}
         
         {isLoading && (
@@ -223,8 +251,6 @@ export const AIAssistant: React.FC = () => {
             </div>
           </div>
         )}
-        
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

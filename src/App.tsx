@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ClerkProvider, SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react'
 import { Dashboard } from './components/dashboard/Dashboard'
 import { ReportsPage } from './components/reports/ReportsPage'
-import { AnalyticsPage } from './components/analytics/AnalyticsPage'
+import { RevenueAnalysis } from './components/analytics/RevenueAnalysis'
+import { ProductPerformance } from './components/analytics/ProductPerformance'
+import { CustomerInsights } from './components/analytics/CustomerInsights'
 import { DataManagementPage } from './components/data/DataManagementPage'
 import { SettingsPage } from './components/settings/SettingsPage'
 import { LandingPage } from './components/landing/LandingPage'
@@ -52,10 +54,26 @@ function App() {
             }
           />
           <Route
-            path="/analytics"
+            path="/analytics/revenue"
             element={
               <SignedIn>
-                <AnalyticsPage />
+                <RevenueAnalysis />
+              </SignedIn>
+            }
+          />
+          <Route
+            path="/analytics/products"
+            element={
+              <SignedIn>
+                <ProductPerformance />
+              </SignedIn>
+            }
+          />
+          <Route
+            path="/analytics/customers"
+            element={
+              <SignedIn>
+                <CustomerInsights />
               </SignedIn>
             }
           />
