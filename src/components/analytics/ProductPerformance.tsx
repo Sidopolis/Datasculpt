@@ -1,6 +1,5 @@
 import React from 'react'
-import { DashboardHeader } from '../dashboard/DashboardHeader'
-import { Sidebar } from '../dashboard/Sidebar'
+import { MainLayout } from '../dashboard/MainLayout'
 import { Package, TrendingUp, ArrowUpRight, ArrowDownRight, BarChart2 } from 'lucide-react'
 
 export const ProductPerformance: React.FC = () => {
@@ -20,11 +19,8 @@ export const ProductPerformance: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <DashboardHeader />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-4">
+    <MainLayout>
+      <div>
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Product Performance</h1>
@@ -150,8 +146,7 @@ export const ProductPerformance: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   )
 }

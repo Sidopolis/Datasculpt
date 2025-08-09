@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { DashboardHeader } from '../dashboard/DashboardHeader'
-import { Sidebar } from '../dashboard/Sidebar'
+import { MainLayout } from '../dashboard/MainLayout'
 import { ChartContainer } from '../charts/ChartContainer'
 import { TrendingUp, Users, Package, DollarSign, BarChart3, Download } from 'lucide-react'
 import { DataSculptAPI, downloadFile } from '../../lib/api'
@@ -357,17 +356,13 @@ export const AnalyticsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <DashboardHeader />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-4">
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Analytics Dashboard</h1>
-              <p className="text-slate-600 dark:text-slate-300">Comprehensive insights into your business performance</p>
-            </div>
+    <MainLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Analytics Dashboard</h1>
+          <p className="text-slate-600 dark:text-slate-300">Comprehensive insights into your business performance</p>
+        </div>
 
             {/* Tabs */}
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -393,9 +388,7 @@ export const AnalyticsPage: React.FC = () => {
                 {renderTabContent()}
               </div>
             </div>
-          </div>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   )
 } 

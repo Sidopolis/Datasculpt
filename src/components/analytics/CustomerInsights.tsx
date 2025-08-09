@@ -1,7 +1,6 @@
 import React from 'react'
-import { DashboardHeader } from '../dashboard/DashboardHeader'
-import { Sidebar } from '../dashboard/Sidebar'
-import { Users, TrendingUp, Activity, ShoppingBag, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { MainLayout } from '../dashboard/MainLayout'
+import { Users, Activity, ShoppingBag, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 
 export const CustomerInsights: React.FC = () => {
   const customerData = {
@@ -24,11 +23,8 @@ export const CustomerInsights: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <DashboardHeader />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-4">
+    <MainLayout>
+      <div>
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Customer Insights</h1>
@@ -160,8 +156,7 @@ export const CustomerInsights: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   )
 }

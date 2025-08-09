@@ -107,26 +107,26 @@ export const DataManagementPage: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'connected':
-        return 'text-green-600 bg-green-50'
+        return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30'
       case 'disconnected':
-        return 'text-gray-600 bg-gray-50'
+        return 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/30'
       case 'error':
-        return 'text-red-600 bg-red-50'
+        return 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30'
       default:
-        return 'text-gray-600 bg-gray-50'
+        return 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/30'
     }
   }
 
   const getQualityColor = (status: string) => {
     switch (status) {
       case 'good':
-        return 'text-green-600'
+        return 'text-green-600 dark:text-green-400'
       case 'warning':
-        return 'text-yellow-600'
+        return 'text-yellow-600 dark:text-yellow-400'
       case 'error':
-        return 'text-red-600'
+        return 'text-red-600 dark:text-red-400'
       default:
-        return 'text-gray-600'
+        return 'text-gray-600 dark:text-gray-400'
     }
   }
 
@@ -137,82 +137,82 @@ export const DataManagementPage: React.FC = () => {
           <div className="space-y-6">
             {/* Data Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600 mb-1">Total Records</p>
-                    <p className="text-2xl font-semibold text-slate-900">27,580</p>
-                    <p className="text-xs text-green-600 mt-1">+12.5% from last month</p>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-200 mb-1">Total Records</p>
+                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">27,580</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">+12.5% from last month</p>
                   </div>
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Database className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600 mb-1">Active Sources</p>
-                    <p className="text-2xl font-semibold text-slate-900">3</p>
-                    <p className="text-xs text-green-600 mt-1">1 source with issues</p>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-200 mb-1">Active Sources</p>
+                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">3</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">1 source with issues</p>
                   </div>
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Upload className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <Upload className="w-5 h-5 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600 mb-1">Data Quality</p>
-                    <p className="text-2xl font-semibold text-slate-900">94.1%</p>
-                    <p className="text-xs text-yellow-600 mt-1">Consistency needs attention</p>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-200 mb-1">Data Quality</p>
+                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">94.1%</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Consistency needs attention</p>
                   </div>
-                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-yellow-600" />
+                  <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600 mb-1">Last Sync</p>
-                    <p className="text-2xl font-semibold text-slate-900">2 min</p>
-                    <p className="text-xs text-green-600 mt-1">All systems operational</p>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-200 mb-1">Last Sync</p>
+                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">2 min</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">All systems operational</p>
                   </div>
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <RefreshCw className="w-5 h-5 text-purple-600" />
+                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">Data sync completed</p>
-                    <p className="text-xs text-slate-600">PostgreSQL Database • 2 minutes ago</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Data sync completed</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">PostgreSQL Database • 2 minutes ago</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg">
                   <Upload className="w-4 h-4 text-blue-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">New data imported</p>
-                    <p className="text-xs text-slate-600">Customer CSV • 1 hour ago</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">New data imported</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">Customer CSV • 1 hour ago</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-lg">
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">Connection failed</p>
-                    <p className="text-xs text-slate-600">Legacy System • 2 hours ago</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Connection failed</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">Legacy System • 2 hours ago</p>
                   </div>
                 </div>
               </div>
@@ -223,29 +223,29 @@ export const DataManagementPage: React.FC = () => {
       case 'sources':
         return (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">Data Sources</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Data Sources</h3>
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                   Add Source
                 </button>
               </div>
               <div className="space-y-4">
                 {dataSources.map((source) => (
-                  <div key={source.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                  <div key={source.id} className="flex items-center justify-between p-4 border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg">
                     <div className="flex items-center space-x-4">
                       {getStatusIcon(source.status)}
                       <div>
-                        <p className="font-medium text-slate-900">{source.name}</p>
-                        <p className="text-sm text-slate-600">{source.records.toLocaleString()} records</p>
+                        <p className="font-medium text-slate-900 dark:text-white">{source.name}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{source.records.toLocaleString()} records</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(source.status)}`}>
                         {source.status}
                       </span>
-                      <p className="text-sm text-slate-600">Last sync: {source.lastSync}</p>
-                      <button className="p-2 text-slate-400 hover:text-slate-600">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Last sync: {source.lastSync}</p>
+                      <button className="p-2 text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-100">
                         <RefreshCw className="w-4 h-4" />
                       </button>
                     </div>
@@ -259,16 +259,16 @@ export const DataManagementPage: React.FC = () => {
       case 'quality':
         return (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Data Quality Metrics</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Data Quality Metrics</h3>
               <div className="space-y-4">
                 {dataQuality.map((quality, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg">
                     <div className="flex items-center space-x-4">
                       <div className={`w-3 h-3 rounded-full ${quality.status === 'good' ? 'bg-green-500' : quality.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
                       <div>
-                        <p className="font-medium text-slate-900">{quality.metric}</p>
-                        <p className="text-sm text-slate-600">{quality.description}</p>
+                        <p className="font-medium text-slate-900 dark:text-white">{quality.metric}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{quality.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -282,43 +282,43 @@ export const DataManagementPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Quality Issues</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Quality Issues</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-slate-900">Missing Customer Data</p>
-                      <p className="text-xs text-slate-600">1,247 records affected</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">Missing Customer Data</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">1,247 records affected</p>
                     </div>
-                    <span className="text-xs text-red-600 font-medium">High Priority</span>
+                    <span className="text-xs text-red-600 dark:text-red-400 font-medium">High Priority</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-100 dark:border-yellow-800 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-slate-900">Duplicate Records</p>
-                      <p className="text-xs text-slate-600">89 records affected</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">Duplicate Records</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">89 records affected</p>
                     </div>
-                    <span className="text-xs text-yellow-600 font-medium">Medium Priority</span>
+                    <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Medium Priority</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Data Validation</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Data Validation</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Email Format</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Email Format</span>
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Phone Numbers</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Phone Numbers</span>
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Address Format</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Address Format</span>
                     <AlertTriangle className="w-4 h-4 text-yellow-500" />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Product Codes</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Product Codes</span>
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
                 </div>
@@ -331,95 +331,95 @@ export const DataManagementPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Data Operations</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Data Operations</h3>
                 <div className="space-y-3">
-                  <button className="w-full flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                  <button className="w-full flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
                     <div className="flex items-center space-x-3">
-                      <Upload className="w-5 h-5 text-blue-600" />
+                      <Upload className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       <div>
-                        <p className="font-medium text-slate-900">Import Data</p>
-                        <p className="text-xs text-slate-600">Upload CSV, Excel files</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Import Data</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300">Upload CSV, Excel files</p>
                       </div>
                     </div>
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-slate-400 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
 
-                  <button className="w-full flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                  <button className="w-full flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors">
                     <div className="flex items-center space-x-3">
-                      <Download className="w-5 h-5 text-green-600" />
+                      <Download className="w-5 h-5 text-green-600 dark:text-green-400" />
                       <div>
-                        <p className="font-medium text-slate-900">Export Data</p>
-                        <p className="text-xs text-slate-600">Download reports, datasets</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Export Data</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300">Download reports, datasets</p>
                       </div>
                     </div>
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-slate-400 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
 
-                  <button className="w-full flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                  <button className="w-full flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
                     <div className="flex items-center space-x-3">
-                      <RefreshCw className="w-5 h-5 text-purple-600" />
+                      <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                       <div>
-                        <p className="font-medium text-slate-900">Sync All Sources</p>
-                        <p className="text-xs text-slate-600">Update all data sources</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Sync All Sources</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300">Update all data sources</p>
                       </div>
                     </div>
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-slate-400 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Scheduled Tasks</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Scheduled Tasks</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-lg">
                     <div>
-                      <p className="font-medium text-slate-900">Daily Data Sync</p>
-                      <p className="text-xs text-slate-600">Every day at 2:00 AM</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Daily Data Sync</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">Every day at 2:00 AM</p>
                     </div>
-                    <span className="text-xs text-green-600 font-medium">Active</span>
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">Active</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-lg">
                     <div>
-                      <p className="font-medium text-slate-900">Weekly Backup</p>
-                      <p className="text-xs text-slate-600">Every Sunday at 1:00 AM</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Weekly Backup</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">Every Sunday at 1:00 AM</p>
                     </div>
-                    <span className="text-xs text-green-600 font-medium">Active</span>
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">Active</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-lg">
                     <div>
-                      <p className="font-medium text-slate-900">Monthly Cleanup</p>
-                      <p className="text-xs text-slate-600">First day of month</p>
+                      <p className="font-medium text-slate-900 dark:text-white">Monthly Cleanup</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">First day of month</p>
                     </div>
-                    <span className="text-xs text-gray-600 font-medium">Paused</span>
+                    <span className="text-xs text-gray-600 dark:text-slate-300 font-medium">Paused</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">System Status</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-slate-200 dark:border-gray-700 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">System Status</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg">
                   <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <p className="font-medium text-slate-900">Database</p>
-                  <p className="text-sm text-green-600">Operational</p>
+                  <p className="font-medium text-slate-900 dark:text-white">Database</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">Operational</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg">
                   <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <p className="font-medium text-slate-900">API Services</p>
-                  <p className="text-sm text-green-600">Operational</p>
+                  <p className="font-medium text-slate-900 dark:text-white">API Services</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">Operational</p>
                 </div>
-                <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-center p-4 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 rounded-lg">
                   <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                  <p className="font-medium text-slate-900">Legacy System</p>
-                  <p className="text-sm text-red-600">Offline</p>
+                  <p className="font-medium text-slate-900 dark:text-white">Legacy System</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">Offline</p>
                 </div>
               </div>
             </div>
@@ -432,21 +432,21 @@ export const DataManagementPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <DashboardHeader />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-4">
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-slate-900 mb-2">Data Management</h1>
-              <p className="text-slate-600">Monitor and manage your data sources, quality, and operations</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+              <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Data Management</h1>
+              <p className="text-slate-600 dark:text-slate-300">Monitor and manage your data sources, quality, and operations</p>
             </div>
 
             {/* Tabs */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="border-b border-slate-200">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <div className="border-b border-slate-200 dark:border-slate-700">
                 <nav className="flex space-x-8 px-6">
                   {tabs.map((tab) => (
                     <button
@@ -454,8 +454,8 @@ export const DataManagementPage: React.FC = () => {
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                         activeTab === tab.id
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                          ? 'border-blue-500 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                          : 'border-transparent text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-500'
                       }`}
                     >
                       <tab.icon className="w-4 h-4" />
@@ -473,4 +473,4 @@ export const DataManagementPage: React.FC = () => {
       </div>
     </div>
   )
-} 
+}

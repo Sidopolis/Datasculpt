@@ -85,57 +85,57 @@ export const ReportsPage: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <DashboardHeader />
       <div className="flex">
         <Sidebar />
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-slate-200 p-6">
+          <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-6">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-semibold text-slate-900">AI Analytics Chat</h1>
-                <p className="text-slate-600">Ask questions about your data and get instant insights</p>
+                <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">AI Analytics Chat</h1>
+                <p className="text-slate-600 dark:text-slate-300">Ask questions about your data and get instant insights</p>
               </div>
             </div>
           </div>
 
           {/* Main Chat Area */}
-          <div className="flex-1 flex bg-white">
+          <div className="flex-1 flex bg-white dark:bg-slate-900">
             {/* Left Sidebar - Chat History */}
-            <div className="w-80 bg-slate-50 border-r border-slate-200 flex flex-col">
+            <div className="w-80 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col">
               {/* Top Actions */}
-              <div className="p-4 border-b border-slate-200">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-4">
-                  <button className="p-2 hover:bg-slate-200 rounded-lg">
-                    <Search className="w-5 h-5 text-slate-600" />
+                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Search className="w-5 h-5" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 rounded-lg">
-                    <Settings className="w-5 h-5 text-slate-600" />
+                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Settings className="w-5 h-5" />
                   </button>
                 </div>
-                                 <button 
-                   onClick={() => {
-                     setReports([])
-                     setSelectedReport(null)
-                     setPrompt('')
-                   }}
-                   className="w-full flex items-center space-x-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                 >
-                   <Plus className="w-4 h-4" />
-                   <span>New Chat</span>
-                 </button>
+                <button 
+                  onClick={() => {
+                    setReports([])
+                    setSelectedReport(null)
+                    setPrompt('')
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Chat</span>
+                </button>
               </div>
 
               {/* Chat History */}
               <div className="flex-1 overflow-y-auto p-4">
-                <h3 className="text-sm font-medium text-slate-600 mb-3">Recent</h3>
+                <h3 className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-3">Recent</h3>
                 <div className="space-y-2">
                   {reports.map((report) => (
                     <button
@@ -143,12 +143,12 @@ export const ReportsPage: React.FC = () => {
                       onClick={() => setSelectedReport(report)}
                       className={`w-full text-left p-3 rounded-lg transition-colors ${
                         selectedReport?.id === report.id 
-                          ? 'bg-blue-50 text-blue-900 border border-blue-200' 
-                          : 'hover:bg-slate-100 text-slate-700'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700' 
+                          : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-2">
-                        <MessageSquare className="w-4 h-4" />
+                        <MessageSquare className={`w-4 h-4 ${selectedReport?.id === report.id ? 'text-blue-600 dark:text-blue-400' : ''}`} />
                         <span className="text-sm truncate">
                           {report.title.length > 30 ? report.title.substring(0, 30) + '...' : report.title}
                         </span>
@@ -160,41 +160,60 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col bg-white">
+            <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
               {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {reports.length === 0 ? (
                   <div className="text-center py-12">
-                    <Bot className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-slate-900 mb-2">
+                    <div className="mx-auto mb-6 w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Bot className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                       Hello, {user?.firstName || user?.username || 'User'}
                     </h2>
-                    <p className="text-slate-600">Ask me anything about your data</p>
+                    <p className="text-slate-600 dark:text-slate-300">Ask me anything about your data</p>
+                    
+                    <div className="mt-8 max-w-lg mx-auto grid grid-cols-2 gap-3">
+                      {quickActions.map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setPrompt(action.prompt)}
+                          className="p-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left text-sm text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                        >
+                          <p className="font-medium mb-1">{action.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{action.prompt}</p>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   reports.map((report) => (
                     <div key={report.id} className="space-y-4">
                       {/* User Message */}
                       <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-white">U</span>
+                        <div className="w-9 h-9 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center shadow-sm">
+                          <span className="text-sm font-medium text-white">{user?.firstName?.[0] || 'U'}</span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-slate-900">{report.title}</p>
+                        <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-2xl rounded-tl-none px-5 py-3">
+                          <p className="text-slate-900 dark:text-white">{report.title}</p>
                         </div>
                       </div>
 
                       {/* AI Response */}
                       <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                          <Bot className="w-4 h-4 text-white" />
+                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm">
+                          <Bot className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 space-y-4">
                           {report.status === 'completed' && report.explanation && (
-                            <p className="text-slate-700">{report.explanation}</p>
+                            <div className="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-none shadow-sm px-5 py-3 border border-slate-100 dark:border-slate-700">
+                              <p className="text-slate-700 dark:text-slate-200">{report.explanation}</p>
+                            </div>
                           )}
                           {report.status === 'error' && (
-                            <p className="text-red-600">Sorry, I couldn't generate that report. Please try rephrasing your question.</p>
+                            <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-none border border-red-100 dark:border-red-900/30 px-5 py-3">
+                              <p className="text-red-700 dark:text-red-300">Sorry, I couldn't generate that report. Please try rephrasing your question.</p>
+                            </div>
                           )}
 
                           {/* Data Visualization */}
@@ -202,10 +221,10 @@ export const ReportsPage: React.FC = () => {
                             <div className="space-y-4">
                               {/* Chart Visualization */}
                               {report.visualization && report.visualization !== 'table' && (
-                                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 border border-slate-200 dark:border-slate-700">
                                   <div className="flex items-center justify-between mb-3">
-                                    <h4 className="font-medium text-slate-900">Chart Visualization</h4>
-                                    <span className="text-xs text-slate-500 capitalize">
+                                    <h4 className="font-medium text-slate-900 dark:text-white">Chart Visualization</h4>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full capitalize">
                                       {report.visualization} chart
                                     </span>
                                   </div>
@@ -218,9 +237,9 @@ export const ReportsPage: React.FC = () => {
                               )}
                               
                               {/* Data Table */}
-                              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 border border-slate-200 dark:border-slate-700">
                                 <div className="flex items-center justify-between mb-3">
-                                  <h4 className="font-medium text-slate-900">Data Table</h4>
+                                  <h4 className="font-medium text-slate-900 dark:text-white">Data Table</h4>
                                   <button 
                                     onClick={async () => {
                                       try {
@@ -235,7 +254,7 @@ export const ReportsPage: React.FC = () => {
                                         console.error('Download failed:', error)
                                       }
                                     }}
-                                    className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors"
+                                    className="p-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
                                   >
                                     <Download className="w-4 h-4" />
                                   </button>
@@ -244,9 +263,9 @@ export const ReportsPage: React.FC = () => {
                                 <div className="overflow-x-auto">
                                   <table className="w-full text-sm">
                                     <thead>
-                                      <tr className="border-b border-slate-200">
+                                      <tr className="border-b border-slate-200 dark:border-slate-700">
                                         {report.data[0] && Object.keys(report.data[0]).map((key) => (
-                                          <th key={key} className="text-left py-2 px-3 font-medium text-slate-700">
+                                          <th key={key} className="text-left py-2 px-3 font-medium text-slate-700 dark:text-slate-300">
                                             {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                           </th>
                                         ))}
@@ -254,9 +273,9 @@ export const ReportsPage: React.FC = () => {
                                     </thead>
                                     <tbody>
                                       {report.data.slice(0, 5).map((row, index) => (
-                                        <tr key={index} className="border-b border-slate-100">
+                                        <tr key={index} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                           {Object.values(row).map((value, cellIndex) => (
-                                            <td key={cellIndex} className="py-2 px-3 text-slate-600">
+                                            <td key={cellIndex} className="py-2 px-3 text-slate-600 dark:text-slate-400">
                                               {typeof value === 'number' ? value.toLocaleString() : String(value)}
                                             </td>
                                           ))}
@@ -265,7 +284,7 @@ export const ReportsPage: React.FC = () => {
                                     </tbody>
                                   </table>
                                   {report.data.length > 5 && (
-                                    <p className="text-xs text-slate-500 mt-2">Showing first 5 rows of {report.data.length} total results</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Showing first 5 rows of {report.data.length} total results</p>
                                   )}
                                 </div>
                               </div>
@@ -275,10 +294,10 @@ export const ReportsPage: React.FC = () => {
                           {/* SQL Query (for debugging) */}
                           {report.status === 'completed' && report.sqlQuery && (
                             <details className="mt-4">
-                              <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-700">
+                              <summary className="text-sm text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
                                 View SQL Query
                               </summary>
-                              <pre className="mt-2 p-3 bg-slate-100 rounded text-xs text-slate-700 overflow-x-auto border border-slate-200">
+                              <pre className="mt-2 p-3 bg-slate-100 dark:bg-slate-800 rounded text-xs text-slate-700 dark:text-slate-300 overflow-x-auto border border-slate-200 dark:border-slate-700">
                                 {report.sqlQuery}
                               </pre>
                             </details>
@@ -292,13 +311,15 @@ export const ReportsPage: React.FC = () => {
                 {/* Loading State */}
                 {isGenerating && (
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-white" />
+                    <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-slate-700">Analyzing your data...</span>
+                    <div className="flex-1 space-y-4">
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-none px-5 py-4 border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-5 h-5 border-2 border-indigo-600 dark:border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-slate-700 dark:text-slate-300">Analyzing your data...</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -306,7 +327,7 @@ export const ReportsPage: React.FC = () => {
               </div>
 
               {/* Input Area */}
-              <div className="p-6 border-t border-slate-200 bg-white">
+              <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                 <div className="flex space-x-4">
                   <div className="flex-1 relative">
                     <input
@@ -314,30 +335,30 @@ export const ReportsPage: React.FC = () => {
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Ask me anything about your data (e.g., 'Show me the best month where sales of particular items are high')"
-                      className="w-full px-4 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white bg-white dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-sm"
                       onKeyPress={(e) => e.key === 'Enter' && handleGenerateReport()}
                     />
-                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                       <button 
-                         onClick={() => setPrompt('Show total sales by brand')}
-                         className="p-1 text-slate-400 hover:text-slate-600"
-                         title="Quick query: Sales by brand"
-                       >
-                         <Plus className="w-4 h-4" />
-                       </button>
-                       <button 
-                         onClick={() => setPrompt('Show top 5 products by sales')}
-                         className="p-1 text-slate-400 hover:text-slate-600"
-                         title="Quick query: Top products"
-                       >
-                         <MessageSquare className="w-4 h-4" />
-                       </button>
-                     </div>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                      <button 
+                        onClick={() => setPrompt('Show total sales by brand')}
+                        className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                        title="Quick query: Sales by brand"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => setPrompt('Show top 5 products by sales')}
+                        className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                        title="Quick query: Top products"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <button
                     onClick={handleGenerateReport}
                     disabled={isGenerating || !prompt.trim()}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -349,7 +370,7 @@ export const ReportsPage: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => setPrompt(action.prompt)}
-                      className="p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors text-left text-sm text-slate-700 border border-slate-200"
+                      className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors text-left text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 shadow-sm"
                     >
                       {action.title}
                     </button>

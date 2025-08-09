@@ -243,20 +243,18 @@ export const ReportPage: React.FC = () => {
 
   const renderMessage = (message: ChatMessage) => {
     const isUser = message.type === 'user'
-    
     return (
       <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-          isUser 
-            ? 'bg-slate-900 text-white' 
+        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow ${
+          isUser
+            ? 'bg-blue-600 text-white dark:bg-blue-700'
             : 'bg-white text-slate-900 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'
         }`}>
           <div className="flex items-start space-x-2">
-            {message.type === 'assistant' && <Bot className="w-4 h-4 mt-1 flex-shrink-0" />}
-            {message.type === 'user' && <User className="w-4 h-4 mt-1 flex-shrink-0" />}
+            {message.type === 'assistant' && <Bot className="w-4 h-4 mt-1 flex-shrink-0 text-blue-500 dark:text-blue-400" />}
+            {message.type === 'user' && <User className="w-4 h-4 mt-1 flex-shrink-0 text-white dark:text-white" />}
             <div className="flex-1">
               <p className="text-sm whitespace-pre-line">{message.content}</p>
-              
               {message.chartData && message.chartType && (
                 <div className="mt-3 p-3 bg-slate-50 rounded-lg dark:bg-slate-700">
                   <div className="h-48">
@@ -330,7 +328,7 @@ export const ReportPage: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <MessageSquare className="w-5 h-5 text-blue-600" />
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI Assistant</h3>
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full font-medium">
                     Live
                   </span>
                 </div>
@@ -350,11 +348,11 @@ export const ReportPage: React.FC = () => {
                   </div>
                 )}
                 {messages.length === 0 && !isLoading && !error && (
-                  <div className="text-center text-slate-500 py-12">
+                  <div className="text-center text-slate-500 dark:text-slate-400 py-12">
                     <Bot className="w-12 h-12 mx-auto mb-4 text-slate-400" />
                     <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">Start Your Analysis</h3>
                     <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">Ask me to generate reports about your data</p>
-                    <div className="space-y-2 text-xs text-slate-500">
+                    <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
                       <p>• "Show revenue by state"</p>
                       <p>• "Generate trend analysis"</p>
                       <p>• "Top performing products"</p>

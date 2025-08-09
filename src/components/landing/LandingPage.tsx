@@ -6,13 +6,13 @@ import { SignInButton } from '@clerk/clerk-react'
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="h-screen min-h-0 relative flex flex-col overflow-hidden">
+    <div className="h-screen min-h-0 relative flex flex-col overflow-hidden bg-white dark:bg-slate-900">
       {/* Animated SVG Pattern Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <svg width="100%" height="100%" className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="luxPattern" patternUnits="userSpaceOnUse" width="80" height="80">
-              <rect x="0" y="0" width="80" height="80" fill="#fff" />
+              <rect x="0" y="0" width="80" height="80" fill="#fff" className="dark:fill-slate-900" />
               <circle cx="40" cy="40" r="36" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.08" />
               <circle cx="40" cy="40" r="18" fill="none" stroke="#ef4444" strokeWidth="1.5" opacity="0.10" />
               <rect x="10" y="10" width="60" height="60" rx="16" fill="none" stroke="#e11d48" strokeWidth="1.2" opacity="0.07" />
@@ -21,18 +21,18 @@ export const LandingPage: React.FC = () => {
           <rect width="100%" height="100%" fill="url(#luxPattern)" />
         </svg>
         {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-white/80 to-slate-100 animate-gradient-move" style={{mixBlendMode:'multiply', opacity:0.95}} />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-white/80 to-slate-100 dark:from-slate-900 dark:via-slate-800/80 dark:to-slate-900 animate-gradient-move" style={{mixBlendMode:'multiply', opacity:0.95}} />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/80 backdrop-blur border-b border-gray-100 shadow-sm">
+  <header className="relative z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-gray-100 dark:border-slate-800 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-gradient-to-tr from-red-600 to-pink-500 rounded-xl flex items-center justify-center shadow">
                 <span className="text-white font-extrabold text-lg tracking-widest">LUX</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900 tracking-tight">LUX Industries</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">LUX Industries</span>
             </div>
             <SignInButton mode="modal">
               <button className="bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white px-6 py-2 rounded-lg text-base font-semibold shadow transition-all duration-200">
@@ -45,13 +45,13 @@ export const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
 
-      <section className="flex-1 flex flex-col items-center justify-center px-2 sm:px-8 lg:px-0 min-h-0 relative z-10">
+  <section className="flex-1 flex flex-col items-center justify-center px-2 sm:px-8 lg:px-0 min-h-0 relative z-10">
         <div className="max-w-4xl w-full mx-auto text-center flex flex-col justify-center h-full">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight drop-shadow-sm">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight drop-shadow-sm">
             Transform Your Business<br />
             <span className="bg-gradient-to-r from-red-600 to-pink-500 bg-clip-text text-transparent">with LUX Dashboard</span>
           </h1>
-          <p className="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 dark:text-slate-300 mb-6 max-w-2xl mx-auto">
             Deep analytics, actionable insights, and a beautiful interface to help you grow, optimize, and lead your industry. <br />
             Trusted by leaders with a rich legacy and a vision for the future.
           </p>
@@ -60,30 +60,30 @@ export const LandingPage: React.FC = () => {
           {/* Floating Legacy Wall - Animated Newspaper Articles */}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border-t-4 border-red-500 hover:scale-105 transition-transform duration-200">
-              <h3 className="font-bold text-base text-red-600 mb-2 flex items-center justify-center gap-2">
+            <div className="bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-lg p-6 border-t-4 border-red-500 hover:scale-105 transition-transform duration-200">
+              <h3 className="font-bold text-base text-red-600 dark:text-red-400 mb-2 flex items-center justify-center gap-2">
                 <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 17v-2a4 4 0 014-4h10a4 4 0 014 4v2" /></svg>
                 Sales & Revenue
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-slate-300 text-sm">
                 Track daily sales, top products, and discover which states are driving your success.
               </p>
             </div>
-            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border-t-4 border-pink-500 hover:scale-105 transition-transform duration-200">
-              <h3 className="font-bold text-base text-pink-600 mb-2 flex items-center justify-center gap-2">
+            <div className="bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-lg p-6 border-t-4 border-pink-500 hover:scale-105 transition-transform duration-200">
+              <h3 className="font-bold text-base text-pink-600 dark:text-pink-400 mb-2 flex items-center justify-center gap-2">
                 <svg className="w-5 h-5 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
                 Business Insights
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-slate-300 text-sm">
                 Uncover growth trends, monitor inventory, and understand customer behavior patterns.
               </p>
             </div>
-            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border-t-4 border-indigo-500 hover:scale-105 transition-transform duration-200">
-              <h3 className="font-bold text-base text-indigo-600 mb-2 flex items-center justify-center gap-2">
+            <div className="bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-lg p-6 border-t-4 border-indigo-500 hover:scale-105 transition-transform duration-200">
+              <h3 className="font-bold text-base text-indigo-600 dark:text-indigo-400 mb-2 flex items-center justify-center gap-2">
                 <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2" /></svg>
                 Legacy & Trust
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-slate-300 text-sm">
                 Built for organizations with deep history and a commitment to excellence.
               </p>
             </div>
@@ -98,16 +98,16 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 bg-white/90 border-t border-gray-200 py-4 shadow-inner">
+  <footer className="relative z-10 bg-white/90 dark:bg-slate-900/90 border-t border-gray-200 dark:border-slate-800 py-4 shadow-inner">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-tr from-red-600 to-pink-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-base">LUX</span>
               </div>
-              <span className="text-base text-gray-700 font-semibold">LUX Industries Dashboard</span>
+              <span className="text-base text-gray-700 dark:text-white font-semibold">LUX Industries Dashboard</span>
             </div>
-            <div className="text-xs text-gray-400">&copy; {new Date().getFullYear()} LUX Industries. All rights reserved.</div>
+            <div className="text-xs text-gray-400 dark:text-slate-400">&copy; {new Date().getFullYear()} LUX Industries. All rights reserved.</div>
           </div>
         </div>
       </footer>
@@ -165,5 +165,5 @@ export const LandingPage: React.FC = () => {
         }
       `}</style>
     </div>
-  )
+  );
 }

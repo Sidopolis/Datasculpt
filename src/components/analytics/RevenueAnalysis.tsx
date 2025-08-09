@@ -1,6 +1,5 @@
 import React from 'react'
-import { DashboardHeader } from '../dashboard/DashboardHeader'
-import { Sidebar } from '../dashboard/Sidebar'
+import { MainLayout } from '../dashboard/MainLayout'
 import { TrendingUp, DollarSign, ShoppingCart, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { ChartContainer } from '../charts/ChartContainer'
 
@@ -20,16 +19,13 @@ export const RevenueAnalysis: React.FC = () => {
   const mockChartData = {
     id: 'revenue-trend',
     title: 'Revenue Trend',
-    type: 'line',
+    type: 'line' as const,
     data: [] // This would be populated with actual data
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <DashboardHeader />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-4">
+    <MainLayout>
+      <div className="space-y-6">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Revenue Analysis</h1>
@@ -133,8 +129,7 @@ export const RevenueAnalysis: React.FC = () => {
               </div>
             </div>
           </div>
-        </main>
       </div>
-    </div>
+    </MainLayout>
   )
 }
