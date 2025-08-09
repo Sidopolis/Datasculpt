@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageSquare, Send, Bot, User, Code, Play, AlertCircle, CheckCircle } from 'lucide-react'
+import { Send, Bot, User, Code, Play, AlertCircle, CheckCircle, PlusCircle } from 'lucide-react'
 import { DataSculptAPI, BedrockResponse } from '../../lib/api'
 
 interface Message {
@@ -29,10 +29,6 @@ export const AIAssistant: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -149,59 +145,62 @@ export const AIAssistant: React.FC = () => {
     const isUser = message.type === 'user'
     
     return (
-      <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl ${
+      <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+        {!isUser && (
+          <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-2 mt-1">
+            <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+          </div>
+        )}
+        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-sm ${
           isUser 
-            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-            : 'bg-gray-50 text-gray-900 border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white' 
+            : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
         }`}>
           <div className="flex items-start space-x-2">
-            {message.type === 'assistant' && <Bot className="w-4 h-4 mt-1 flex-shrink-0" />}
-            {message.type === 'user' && <User className="w-4 h-4 mt-1 flex-shrink-0" />}
             <div className="flex-1">
-              <p className="text-sm whitespace-pre-line">{message.content}</p>
+              <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
               
               {message.sqlQuery && (
-                <div className="mt-3 p-3 bg-gray-800 rounded-lg text-xs font-mono text-green-400 overflow-x-auto">
+                <div className="mt-3 p-3 bg-slate-800 dark:bg-slate-900 rounded-lg text-xs font-mono text-green-400 dark:text-green-300 overflow-x-auto border border-slate-700 dark:border-slate-600">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center">
                       <Code className="w-3 h-3 mr-1" />
-                      <span className="text-gray-400">SQL Query:</span>
+                      <span className="text-slate-400 dark:text-slate-300">SQL Query:</span>
                     </div>
                     {message.status === 'pending' && (
                       <button
                         onClick={() => handleExecuteQuery(message.id, message.sqlQuery!)}
                         disabled={isExecuting}
-                        className="flex items-center space-x-1 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
+                        className="flex items-center space-x-1 px-2 py-1 bg-blue-600 dark:bg-blue-700 text-white rounded text-xs hover:bg-blue-700 dark:hover:bg-blue-800 disabled:opacity-50 transition-colors"
                       >
                         <Play className="w-3 h-3" />
                         <span>Execute</span>
                       </button>
                     )}
                     {message.status === 'success' && (
-                      <div className="flex items-center text-green-400">
+                      <div className="flex items-center text-green-400 dark:text-green-300">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         <span className="text-xs">Executed</span>
                       </div>
                     )}
                     {message.status === 'error' && (
-                      <div className="flex items-center text-red-400">
+                      <div className="flex items-center text-red-400 dark:text-red-300">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         <span className="text-xs">Error</span>
                       </div>
                     )}
                   </div>
-                  <pre className="whitespace-pre-wrap text-xs">{message.sqlQuery}</pre>
+                  <pre className="whitespace-pre-wrap text-xs overflow-auto max-h-40 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">{message.sqlQuery}</pre>
                 </div>
               )}
 
               {message.result && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                   <div className="flex items-center mb-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span className="text-sm font-medium text-green-800">Query Results</span>
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                    <span className="text-sm font-medium text-green-800 dark:text-green-300">Query Results</span>
                   </div>
-                  <div className="text-xs text-green-700">
+                  <div className="text-xs text-green-700 dark:text-green-300 overflow-auto max-h-40 scrollbar-thin scrollbar-thumb-green-200 dark:scrollbar-thumb-green-800 scrollbar-track-transparent">
                     <pre className="whitespace-pre-wrap">{JSON.stringify(message.result, null, 2)}</pre>
                   </div>
                 </div>
@@ -209,66 +208,77 @@ export const AIAssistant: React.FC = () => {
             </div>
           </div>
         </div>
+        {isUser && (
+          <div className="h-8 w-8 rounded-full bg-blue-500 dark:bg-blue-700 flex items-center justify-center ml-2 mt-1">
+            <User size={16} className="text-white" />
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm h-96 flex flex-col">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm h-96 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-100">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
         <div className="flex items-center">
-          <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
-          <h3 className="text-lg font-semibold text-gray-900">AI Data Assistant</h3>
-          <span className="ml-2 px-2 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-xs rounded-full font-medium">
+          <div className="flex items-center justify-center bg-white/10 dark:bg-white/20 backdrop-blur-sm p-1.5 rounded-full mr-2">
+            <Bot size={16} className="text-white" />
+          </div>
+          <h3 className="text-base font-semibold text-white">AI Data Assistant</h3>
+          <span className="ml-2 px-2 py-0.5 bg-white/20 backdrop-blur-sm text-white text-xs rounded-full font-medium">
             Powered by Bedrock
           </span>
         </div>
         <button
           onClick={handleNewChat}
-          className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          className="px-2 py-1 text-sm font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors flex items-center"
         >
+          <PlusCircle size={14} className="mr-1" />
           New Chat
         </button>
       </div>
 
       {/* Messages */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
         {messages.map(renderMessage)}
         
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-50 text-gray-900 max-w-xs lg:max-w-md px-4 py-3 rounded-xl border border-gray-200">
+          <div className="flex justify-start mb-4">
+            <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-2">
+              <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+            </div>
+            <div className="bg-white dark:bg-slate-800 max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100">
               <div className="flex items-center space-x-2">
-                <Bot className="w-4 h-4" />
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.3s'}}></div>
+                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.6s'}}></div>
                 </div>
-                <span className="text-sm text-gray-600">Processing...</span>
+                <span className="text-sm text-slate-600 dark:text-slate-300">Processing your request...</span>
               </div>
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-6 border-t border-gray-100">
-        <div className="flex space-x-3">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div className="flex space-x-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask about your data..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200 placeholder-slate-400 dark:placeholder-slate-500"
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
           >
             <Send className="w-4 h-4" />
           </button>

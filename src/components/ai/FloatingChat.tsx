@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageSquare, X, Send, Plus, Move } from 'lucide-react'
+import { MessageSquare, X, Send, Plus, Move, User, Bot } from 'lucide-react'
 import { callBedrockFloatingChat, BedrockFloatingChatResponse } from '../../lib/bedrockFloatingChat'
 
 interface Message {
@@ -160,21 +160,35 @@ export default function FloatingChat() {
         key={message.id}
         className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}
       >
+        {!message.isUser && (
+          <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-2 mt-1">
+            <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+          </div>
+        )}
         <div
-          className={`max-w-[80%] rounded-lg px-4 py-2 ${
+          className={`max-w-[75%] rounded-lg px-4 py-3 shadow-sm ${
             message.isUser
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-800'
+              ? 'bg-blue-500 text-white dark:bg-blue-600'
+              : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
           }`}
         >
           <div 
-            className="prose prose-sm max-w-none"
+            className="prose prose-sm dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: formattedContent }}
           />
-          <div className={`text-xs mt-1 ${message.isUser ? 'text-blue-100' : 'text-gray-500'}`}>
+          <div className={`text-xs mt-1 ${
+            message.isUser 
+              ? 'text-blue-100 dark:text-blue-200' 
+              : 'text-slate-500 dark:text-slate-400'
+          }`}>
             {message.timestamp.toLocaleTimeString()}
           </div>
         </div>
+        {message.isUser && (
+          <div className="h-8 w-8 rounded-full bg-blue-500 dark:bg-blue-700 flex items-center justify-center ml-2 mt-1">
+            <User size={16} className="text-white" />
+          </div>
+        )}
       </div>
     )
   }
@@ -184,9 +198,12 @@ export default function FloatingChat() {
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110"
+          className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110 relative"
+          aria-label="Open AI Assistant"
         >
           <MessageSquare size={24} />
+          <div className="absolute top-0 right-0 -mt-1 -mr-1 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-slate-900"></div>
+          <span className="absolute inset-0 rounded-full bg-blue-400 dark:bg-blue-500 animate-ping opacity-75"></span>
         </button>
       </div>
     )
@@ -196,7 +213,7 @@ export default function FloatingChat() {
     <div className="fixed bottom-4 right-4 z-50">
       <div
         ref={chatRef}
-        className="bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden"
+        className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden backdrop-blur-sm"
         style={{
           width: chatSize.width,
           height: chatSize.height,
@@ -209,31 +226,40 @@ export default function FloatingChat() {
       >
         {/* Header with Drag Handle */}
         <div 
-          className="bg-blue-500 text-white px-4 py-3 flex items-center justify-between cursor-move"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 text-white px-4 py-3 flex items-center justify-between cursor-move"
           onMouseDown={handleDragStart}
         >
           <div className="flex items-center space-x-2">
-            <Move size={16} className="text-blue-200" />
-            <MessageSquare size={20} />
+            <Move size={16} className="text-blue-200 dark:text-blue-300" />
+            <div className="flex items-center justify-center bg-white dark:bg-slate-700 p-1 rounded-full">
+              <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+            </div>
             <span className="font-semibold">LUX Industries Assistant</span>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-white hover:text-slate-200 transition-colors hover:bg-blue-600 dark:hover:bg-blue-900 rounded-full p-1"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 h-[calc(100%-120px)]">
+        <div className="flex-1 overflow-y-auto p-4 h-[calc(100%-120px)] scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
           {messages.map(renderMessage)}
           {isLoading && (
             <div className="flex justify-start mb-4">
-              <div className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-2">
+                <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+              </div>
+              <div className="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg px-4 py-3 border border-slate-200 dark:border-slate-700 shadow-sm">
                 <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                  <span className="text-sm">Thinking...</span>
+                  <div className="animate-pulse flex space-x-1">
+                    <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
+                    <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full delay-75"></div>
+                    <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full delay-150"></div>
+                  </div>
+                  <span className="text-sm text-slate-600 dark:text-slate-300">Thinking...</span>
                 </div>
               </div>
             </div>
@@ -242,40 +268,44 @@ export default function FloatingChat() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setInput('Tell me about LUX Industries products')}
-              className="text-gray-500 hover:text-blue-500 transition-colors"
-              title="Quick question"
-            >
-              <Plus size={16} />
-            </button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about LUX Industries..."
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <button
+                onClick={() => setInput('Tell me about LUX Industries products')}
+                className="text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors bg-white dark:bg-slate-700 p-2 rounded-full border border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500"
+                title="Quick question"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about LUX Industries..."
+                className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent placeholder-slate-400 dark:placeholder-slate-500"
+                disabled={isLoading}
+              />
+            </div>
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg p-2 transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-500 dark:disabled:text-slate-400 text-white rounded-lg p-2 transition-colors shadow-sm"
             >
               <Send size={16} />
             </button>
           </div>
-          <div className="text-xs text-gray-500 mt-2 text-center">
-            Powered by AWS Bedrock Claude
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+            Powered by <span className="font-medium">AWS Bedrock Claude</span>
           </div>
         </div>
 
         {/* Resize Handle */}
         <div
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-nw-resize bg-gray-300 hover:bg-gray-400 transition-colors"
+          className="absolute bottom-0 right-0 w-5 h-5 cursor-nw-resize bg-slate-300 dark:bg-slate-600 hover:bg-blue-400 dark:hover:bg-blue-600 transition-colors rounded-tl-md"
           onMouseDown={handleResizeStart}
         />
       </div>
