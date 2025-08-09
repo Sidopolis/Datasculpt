@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageSquare, Send, Bot, User, Download, FileText, ArrowLeft, BarChart3, TrendingUp, Calendar } from 'lucide-react'
+import { MessageSquare, Send, Bot, User, Download, FileText, ArrowLeft, BarChart3, TrendingUp, Calendar, Save } from 'lucide-react'
 import { DataSculptAPI, BedrockResponse } from '../../lib/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts'
 import { Link } from 'react-router-dom'
+import { MainLayout } from '../dashboard/MainLayout'
 
 interface ChatMessage {
   id: string
@@ -25,21 +26,33 @@ interface ReportData {
   generatedAt: Date
 }
 
+interface SavedReport {
+  id: string
+  title: string
+  description: string
+  chartType: 'bar' | 'line' | 'pie' | 'area'
+  createdAt: Date
+  data: ReportData
+}
+
 export const ReportPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [currentReport, setCurrentReport] = useState<ReportData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [savedReports, setSavedReports] = useState<SavedReport[]>(() => {
+    const saved = localStorage.getItem('savedReports')
+    return saved ? JSON.parse(saved) : []
+  })
+  const [showSavedReports, setShowSavedReports] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
+  // Save reports to localStorage
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    localStorage.setItem('savedReports', JSON.stringify(savedReports))
+  }, [savedReports])
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return

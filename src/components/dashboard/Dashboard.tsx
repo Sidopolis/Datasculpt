@@ -3,7 +3,7 @@ import { DashboardHeader } from './DashboardHeader'
 import { Sidebar } from './Sidebar'
 import { StatCard } from './StatCard'
 import { ChartContainer } from '../charts/ChartContainer'
-import FloatingChat from '../ai/FloatingChat'
+import FloatingChat from '../ai/FloatingChat.new'
 import { DataSculptAPI, DashboardData } from '../../lib/api'
 import { Package, TrendingUp, ShoppingCart, Users, AlertCircle } from 'lucide-react'
 

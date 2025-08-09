@@ -224,19 +224,12 @@ export const Sidebar: React.FC = () => {
           </nav>
         </div>
         
-        {/* User Profile Section */}
-        <div className="border-t border-gray-200 dark:border-slate-700 p-4 mt-auto">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-              H
+        {/* Footer */}
+        <div className="border-t border-gray-200 dark:border-slate-700 p-3 mt-auto">
+          <div className="flex items-center justify-center">
+            <div className="text-xs text-gray-500 dark:text-slate-400">
+              DataSculpt Analytics Platform
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-800 dark:text-white">Hrithik Singh</p>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Admin</p>
-            </div>
-            <button className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400">
-              <Settings className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>
