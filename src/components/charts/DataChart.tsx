@@ -22,8 +22,8 @@ export const DataChart: React.FC<DataChartProps> = ({ data, type, title }) => {
     let displayName = String(row[keys[0]])
     const value = Number(row[keys[1]] || row[keys[0]] || 0)
     // Format month names if the data contains month information
-    if (displayName.includes('-') && displayName.match(/^\d{4}-\d{2}$/)) {
-      // Convert YYYY-MM to readable month name
+    if (displayName.includes('-') && displayName.match(/^\d{4}-\d{2}/)) {
+      // Convert YYYY-MM or YYYY-MM-DD to readable month name
       const [year, month] = displayName.split('-')
       const date = new Date(parseInt(year), parseInt(month) - 1)
       displayName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
