@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown, BarChart3, FileText, Database, PieChart, Sun, Moon } from 'lucide-react'
+import { Bell, Search, Menu, User, Settings, LogOut, ChevronDown, BarChart3, FileText, Database, PieChart, Sun, Moon, ChevronUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClerk, useUser } from '@clerk/clerk-react'
 import { useTheme } from '../../contexts/ThemeContext';
+import { DataSculptAPI } from '../../lib/api';
+import { dataSourceManager } from '../../lib/dataSources';
 
 export const DashboardHeader: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isDatabaseOpen, setIsDatabaseOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [currentDatabase, setCurrentDatabase] = useState<'postgresql' | 'mysql'>('postgresql')
   const navigate = useNavigate()
   const { signOut } = useClerk()
   const { user } = useUser()
@@ -43,14 +47,33 @@ export const DashboardHeader: React.FC = () => {
 
   const searchRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
+  const databaseRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Initialize from data source manager first, then localStorage
+    const activeSource = dataSourceManager.getActiveSource()
+    if (activeSource) {
+      setCurrentDatabase(activeSource.type)
+      DataSculptAPI.setDatabaseType(activeSource.type)
+    } else {
+      // Fallback to localStorage
+      const saved = (localStorage.getItem('datasculpt-db') as 'postgresql' | 'mysql' | null)
+      if (saved) {
+        setCurrentDatabase(saved)
+        DataSculptAPI.setDatabaseType(saved)
+      }
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSearchResults(false)
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false)
+      }
+      // Close database dropdown when clicking outside
+      if (databaseRef.current && !databaseRef.current.contains(event.target as Node)) {
+        setIsDatabaseOpen(false)
       }
     }
 
@@ -74,6 +97,25 @@ export const DashboardHeader: React.FC = () => {
   const handleSettingsClick = () => {
     navigate('/settings')
     setIsProfileOpen(false)
+  }
+
+  const handleDatabaseChange = (database: 'postgresql' | 'mysql') => {
+    setCurrentDatabase(database)
+    localStorage.setItem('datasculpt-db', database)
+    DataSculptAPI.setDatabaseType(database)
+    setIsDatabaseOpen(false)
+  }
+
+  const handleDataSourceChange = (sourceId: string) => {
+    const success = dataSourceManager.setActiveSource(sourceId)
+    if (success) {
+      const source = dataSourceManager.getActiveSource()
+      if (source) {
+        setCurrentDatabase(source.type)
+        DataSculptAPI.setDatabaseType(source.type)
+      }
+    }
+    setIsDatabaseOpen(false)
   }
 
   // Live notifications data
@@ -162,13 +204,79 @@ export const DashboardHeader: React.FC = () => {
 
         {/* Right side - Notifications, Theme Toggle, and Profile */}
         <div className="flex items-center space-x-3">
+          {/* Database Selector */}
+          <div ref={databaseRef} className="relative">
+            <button
+              data-database-selector
+              onClick={() => setIsDatabaseOpen(!isDatabaseOpen)}
+              className="flex items-center space-x-2 px-3 py-2 text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors duration-200"
+            >
+              <Database className="w-4 h-4 text-slate-600 dark:text-slate-200" />
+              <span className="text-sm font-medium">
+                {dataSourceManager.getActiveSource()?.name || currentDatabase}
+              </span>
+              {isDatabaseOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            {/* Database Dropdown */}
+            {isDatabaseOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
+                <div className="p-3 border-b border-slate-100 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Data Sources</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Select your active database</p>
+                </div>
+                <div className="py-2 max-h-64 overflow-y-auto">
+                  {dataSourceManager.getSources().length > 0 ? (
+                    dataSourceManager.getSources().map((source) => (
+                      <button
+                        key={source.id}
+                        onClick={() => handleDataSourceChange(source.id)}
+                        className={`w-full flex items-center space-x-3 px-4 py-2 text-sm transition-colors duration-200 ${
+                          source.isActive
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <Database className="w-4 h-4" />
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">{source.name}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {source.type.toUpperCase()} • {source.host}:{source.port}
+                          </div>
+                        </div>
+                        {source.isActive && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                      No data sources configured
+                    </div>
+                  )}
+                </div>
+                <div className="p-3 border-t border-slate-100 dark:border-slate-700">
+                  <button
+                    onClick={() => {
+                      setIsDatabaseOpen(false)
+                      navigate('/data-management')
+                    }}
+                    className="w-full text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-center"
+                  >
+                    Manage Data Sources
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Notifications */}
           <div ref={notificationsRef} className="relative">
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors duration-200 relative"
+              className="p-2 text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors duration-200 relative"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-5 h-5 text-slate-600 dark:text-slate-200" />
               {notifications.length > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                   <span className="text-xs text-white font-medium">
@@ -180,7 +288,7 @@ export const DashboardHeader: React.FC = () => {
 
             {/* Notifications Dropdown */}
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-slate-200 z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
                 <div className="p-4 border-b border-slate-100">
                   <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                   <p className="text-xs text-slate-500">{notifications.length} new notifications</p>

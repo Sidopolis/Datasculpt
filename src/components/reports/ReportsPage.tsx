@@ -17,6 +17,7 @@ interface Report {
   sqlQuery?: string
   explanation?: string
   visualization?: string
+  isMockData?: boolean
 }
 
 export const ReportsPage: React.FC = () => {
@@ -27,9 +28,22 @@ export const ReportsPage: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([])
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  const [lastQuery, setLastQuery] = useState<string>('')
+  const [retryCount, setRetryCount] = useState(0)
 
   const handleGenerateReport = async () => {
     if (!prompt.trim() || isGenerating) return
+
+    // Check if this is a retry of the same query
+    const isRetry = lastQuery === prompt.trim()
+    if (isRetry) {
+      setRetryCount(prev => prev + 1)
+      // Add a small delay for retries to prevent rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } else {
+      setRetryCount(0)
+      setLastQuery(prompt.trim())
+    }
 
     setIsGenerating(true)
     
@@ -40,9 +54,17 @@ export const ReportsPage: React.FC = () => {
       const sqlResponse = await DataSculptAPI.generateSQLQuery(prompt)
       console.log('SQL Response:', sqlResponse)
       
+      if (!sqlResponse.sqlQuery) {
+        throw new Error('Failed to generate SQL query')
+      }
+      
       // Execute the SQL query
       const queryResult = await DataSculptAPI.verifyAndExecuteSQL(sqlResponse.sqlQuery)
       console.log('Query Result:', queryResult)
+      
+      if (!queryResult.success) {
+        throw new Error(typeof queryResult.error === 'string' ? queryResult.error : 'Query execution failed')
+      }
       
       // Create report with real data
       const newReport: Report = {
@@ -54,7 +76,8 @@ export const ReportsPage: React.FC = () => {
         data: Array.isArray(queryResult.data) ? queryResult.data : [],
         sqlQuery: sqlResponse.sqlQuery,
         explanation: sqlResponse.explanation,
-        visualization: sqlResponse.suggestedVisualization
+        visualization: sqlResponse.suggestedVisualization,
+        isMockData: Boolean(queryResult.note && typeof queryResult.note === 'string' && queryResult.note.includes('mock data'))
       }
       
       console.log('Created report:', newReport)
@@ -63,16 +86,20 @@ export const ReportsPage: React.FC = () => {
       setPrompt('')
     } catch (error) {
       console.error('Error generating report:', error)
-      // Add error report
+      
+      // Add error report with more details
       const errorReport: Report = {
         id: Date.now().toString(),
         title: prompt,
         type: 'Error',
         status: 'error',
-        createdAt: new Date()
+        createdAt: new Date(),
+        explanation: `Failed to generate report: ${error instanceof Error ? error.message : 'Unknown error'}`
       }
       setReports(prev => [errorReport, ...prev])
       setSelectedReport(errorReport)
+      
+      // Don't clear the prompt on error so user can retry
     } finally {
       setIsGenerating(false)
     }
@@ -218,11 +245,30 @@ export const ReportsPage: React.FC = () => {
                           {report.status === 'completed' && report.explanation && (
                             <div className="bg-white dark:bg-slate-800 rounded-2xl rounded-tl-none shadow-sm px-5 py-3 border border-slate-100 dark:border-slate-700">
                               <p className="text-slate-700 dark:text-slate-200">{report.explanation}</p>
+                              {report.isMockData && (
+                                <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                                    <strong>Note:</strong> Using sample data because the MySQL database doesn't have the required tables. 
+                                    Add the sales, products, and brands tables to your MySQL database for real data.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           )}
                           {report.status === 'error' && (
                             <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-none border border-red-100 dark:border-red-900/30 px-5 py-3">
-                              <p className="text-red-700 dark:text-red-300">Sorry, I couldn't generate that report. Please try rephrasing your question.</p>
+                              <p className="text-red-700 dark:text-red-300 mb-2">
+                                {report.explanation || "Sorry, I couldn't generate that report. Please try rephrasing your question."}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setPrompt(report.title)
+                                  handleGenerateReport()
+                                }}
+                                className="text-sm bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
+                              >
+                                Retry Query
+                              </button>
                             </div>
                           )}
 
@@ -234,9 +280,16 @@ export const ReportsPage: React.FC = () => {
                                 <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 border border-slate-200 dark:border-slate-700">
                                   <div className="flex items-center justify-between mb-3">
                                     <h4 className="font-medium text-slate-900 dark:text-white">Chart Visualization</h4>
+                                    <div className="flex items-center space-x-2">
+                                      {report.isMockData && (
+                                        <span className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded-full">
+                                          Mock Data
+                                        </span>
+                                      )}
                                     <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full capitalize">
                                       {report.visualization} chart
                                     </span>
+                                    </div>
                                   </div>
                                   <DataChart 
                                     data={report.data}

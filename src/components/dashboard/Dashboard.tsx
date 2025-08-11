@@ -5,6 +5,7 @@ import { StatCard } from './StatCard'
 import { ChartContainer } from '../charts/ChartContainer'
 import FloatingChat from '../ai/FloatingChat.new'
 import { DataSculptAPI, DashboardData } from '../../lib/api'
+import { dataSourceManager } from '../../lib/dataSources'
 import { Package, TrendingUp, ShoppingCart, Users, AlertCircle } from 'lucide-react'
 
 export const Dashboard: React.FC = () => {
@@ -14,6 +15,28 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchDashboardData()
+  }, [])
+
+  // Listen for database changes and refresh data
+  useEffect(() => {
+    const handleDatabaseChange = () => {
+      console.log('Database changed, refreshing dashboard data...')
+      fetchDashboardData()
+    }
+
+    // Check for database changes every 2 seconds
+    const interval = setInterval(() => {
+      const currentDatabase = DataSculptAPI.getCurrentDatabase()
+      const activeSource = dataSourceManager.getActiveSource()
+      
+      if (activeSource && activeSource.type !== currentDatabase) {
+        console.log(`Database type mismatch: API=${currentDatabase}, Active=${activeSource.type}`)
+        DataSculptAPI.setDatabaseType(activeSource.type)
+        handleDatabaseChange()
+      }
+    }, 2000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const fetchDashboardData = async () => {

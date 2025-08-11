@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { dataSourceManager } from './dataSources'
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
@@ -79,14 +80,42 @@ export function downloadFile(blob: Blob, filename: string) {
 
 // API Service Class
 export class DataSculptAPI {
+  // Database type state
+  private static currentDatabase: 'postgresql' | 'mysql' = 'postgresql'
+
+  // Set database type
+  static setDatabaseType(type: 'postgresql' | 'mysql') {
+    this.currentDatabase = type
+    console.log('Switched to database:', type)
+  }
+
+  // Get current database type
+  static getCurrentDatabase() {
+    return this.currentDatabase
+  }
+
+  // Get active data source
+  static getActiveDataSource() {
+    return dataSourceManager.getActiveSource()
+  }
+
   // Bedrock API Integration
   static async generateSQLQuery(naturalLanguageQuery: string): Promise<BedrockResponse> {
     try {
       console.log('Generating SQL query for:', naturalLanguageQuery);
+      console.log('Current database:', this.currentDatabase);
       
-      // Call the Bedrock backend utility directly
+      let bedrockRaw;
+      
+      if (this.currentDatabase === 'mysql') {
+        // Call MySQL Bedrock utility
+        const { callBedrockMySQL } = await import('./mysqlApi');
+        bedrockRaw = await callBedrockMySQL(naturalLanguageQuery);
+      } else {
+        // Call PostgreSQL Bedrock utility
       const { callBedrock } = await import('./bedrockApi');
-      const bedrockRaw = await callBedrock(naturalLanguageQuery);
+        bedrockRaw = await callBedrock(naturalLanguageQuery);
+      }
       
       console.log('Bedrock raw response:', bedrockRaw);
       
@@ -99,13 +128,22 @@ export class DataSculptAPI {
       };
     } catch (error) {
       console.error('Error generating SQL query:', error);
-      // Return a fallback response
+      // Return a fallback response based on database type
+      if (this.currentDatabase === 'mysql') {
+        return {
+          sqlQuery: "SELECT b.brand_name, SUM(s.total_price) as total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC LIMIT 5;",
+          explanation: "Generated a basic MySQL query for sales by brand analysis.",
+          confidence: 0.7,
+          suggestedVisualization: "bar"
+        };
+      } else {
       return {
         sqlQuery: "SELECT b.brand_name, SUM(s.total_price) as total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC LIMIT 5;",
-        explanation: "Generated a basic query for sales by brand analysis.",
+          explanation: "Generated a basic PostgreSQL query for sales by brand analysis.",
         confidence: 0.7,
         suggestedVisualization: "bar"
       };
+      }
     }
   }
 
@@ -113,13 +151,55 @@ export class DataSculptAPI {
   static async verifyAndExecuteSQL(sqlQuery: string): Promise<Record<string, unknown>> {
     try {
       console.log('Executing SQL query via backend:', sqlQuery);
+      console.log('Current database:', this.currentDatabase);
       
+      let result;
+      const activeSource = dataSourceManager.getActiveSource();
+      
+      if (this.currentDatabase === 'mysql') {
+        // Execute MySQL query via backend endpoint with connection config
+        const response = await fetch(`${API_BASE_URL}/mysql/execute-query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            sqlQuery,
+            connectionConfig: activeSource ? {
+              type: activeSource.type,
+              host: activeSource.host,
+              port: activeSource.port,
+              database: activeSource.database,
+              username: activeSource.username,
+              password: activeSource.password,
+            } : undefined
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to execute MySQL SQL query');
+        }
+
+        result = await response.json();
+      } else {
+        // Execute PostgreSQL query via backend
       const response = await fetch(`${API_BASE_URL}/execute-query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sqlQuery }),
+          body: JSON.stringify({ 
+            sqlQuery,
+            connectionConfig: activeSource ? {
+              type: activeSource.type,
+              host: activeSource.host,
+              port: activeSource.port,
+              database: activeSource.database,
+              username: activeSource.username,
+              password: activeSource.password,
+            } : undefined
+          }),
       });
 
       if (!response.ok) {
@@ -127,8 +207,16 @@ export class DataSculptAPI {
         throw new Error(errorData.error || 'Failed to execute SQL query');
       }
 
-      const result = await response.json();
-      console.log('Backend response:', result);
+        result = await response.json();
+      }
+      
+      console.log('Query execution result:', result);
+      
+      // If using mock data, log it
+      if (result.note && result.note.includes('mock data')) {
+        console.log('⚠️ Using mock MySQL data - database connection unavailable');
+      }
+      
       return result;
     } catch (error) {
       console.error('Error executing SQL query:', error);
