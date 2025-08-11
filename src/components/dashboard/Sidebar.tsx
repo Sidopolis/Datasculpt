@@ -97,33 +97,7 @@ const menuItems: MenuItem[] = [
     id: 'data',
     label: 'Data Management',
     icon: Database,
-    path: '/data-management',
-    children: [
-      {
-        id: 'sources',
-        label: 'Data Sources',
-        icon: Database,
-        path: '/data-management/sources'
-      },
-      {
-        id: 'quality',
-        label: 'Data Quality',
-        icon: ShieldCheck,
-        path: '/data-management/quality'
-      },
-      {
-        id: 'integrations',
-        label: 'Integrations',
-        icon: Zap,
-        path: '/data-management/integrations'
-      }
-    ]
-  },
-  {
-    id: 'visualizations',
-    label: 'Visualizations',
-    icon: PieChart,
-    path: '/visualizations'
+    path: '/data-management'
   },
   {
     id: 'settings',

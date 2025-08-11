@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DashboardHeader } from '../dashboard/DashboardHeader'
 import { Sidebar } from '../dashboard/Sidebar'
-import { ArrowLeft, Download, Send, Bot, Plus, Search, Settings, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Download, Send, Bot, Plus, Search, Settings, MessageSquare, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { DataSculptAPI, downloadFile } from '../../lib/api'
 import { DataChart } from '../charts/DataChart'
@@ -26,6 +26,7 @@ export const ReportsPage: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [reports, setReports] = useState<Report[]>([])
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
 
   const handleGenerateReport = async () => {
     if (!prompt.trim() || isGenerating) return
@@ -113,10 +114,19 @@ export const ReportsPage: React.FC = () => {
               {/* Top Actions */}
               <div className="p-4 border-b border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-4">
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <button 
+                    onClick={() => {
+                      // TODO: Implement search functionality
+                      alert('Search functionality coming soon!')
+                    }}
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
                     <Search className="w-5 h-5" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <button 
+                    onClick={() => setShowSettings(true)}
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
                     <Settings className="w-5 h-5" />
                   </button>
                 </div>
@@ -340,16 +350,36 @@ export const ReportsPage: React.FC = () => {
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
                       <button 
-                        onClick={() => setPrompt('Show total sales by brand')}
+                        onClick={() => {
+                          const suggestions = [
+                            'Show total sales by brand',
+                            'Show monthly revenue trend',
+                            'Show top 10 products by revenue',
+                            'Show customer demographics',
+                            'Show inventory status'
+                          ]
+                          const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)]
+                          setPrompt(randomSuggestion)
+                        }}
                         className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-                        title="Quick query: Sales by brand"
+                        title="Get a random query suggestion"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => setPrompt('Show top 5 products by sales')}
+                        onClick={() => {
+                          const examples = [
+                            'What are our best performing products this month?',
+                            'Show me sales trends over the last 6 months',
+                            'Which brands generate the most revenue?',
+                            'Compare sales performance by category',
+                            'What is our average order value by region?'
+                          ]
+                          const randomExample = examples[Math.floor(Math.random() * examples.length)]
+                          setPrompt(randomExample)
+                        }}
                         className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-                        title="Quick query: Top products"
+                        title="Get a natural language example"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </button>
@@ -364,23 +394,87 @@ export const ReportsPage: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {quickActions.map((action, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setPrompt(action.prompt)}
-                      className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors text-left text-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 shadow-sm"
-                    >
-                      {action.title}
-                    </button>
-                  ))}
-                </div>
+
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-96 max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Report Settings</h3>
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Auto-save Reports
+                </label>
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    defaultChecked 
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                    Automatically save generated reports
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Default Chart Type
+                </label>
+                <select className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white">
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="area">Area Chart</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Max Results per Query
+                </label>
+                <input 
+                  type="number" 
+                  defaultValue={100}
+                  min="10"
+                  max="1000"
+                  className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
