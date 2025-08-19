@@ -81,7 +81,7 @@ export function downloadFile(blob: Blob, filename: string) {
 // API Service Class
 export class DataSculptAPI {
   // Database type state
-  private static currentDatabase: 'postgresql' | 'mysql' = 'postgresql'
+  private static currentDatabase: 'postgresql' | 'mysql' = 'mysql'
 
   // Set database type
   static setDatabaseType(type: 'postgresql' | 'mysql') {
@@ -131,15 +131,15 @@ export class DataSculptAPI {
       // Return a fallback response based on database type
       if (this.currentDatabase === 'mysql') {
         return {
-          sqlQuery: "SELECT b.brand_name, SUM(s.total_price) as total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC LIMIT 5;",
-          explanation: "Generated a basic MySQL query for sales by brand analysis.",
+          sqlQuery: "SELECT division_name, SUM(net_value_inr) as total_revenue FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC LIMIT 5;",
+          explanation: "Generated a basic MySQL query for revenue by division analysis using invoice_history table.",
           confidence: 0.7,
           suggestedVisualization: "bar"
         };
       } else {
       return {
-        sqlQuery: "SELECT b.brand_name, SUM(s.total_price) as total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC LIMIT 5;",
-          explanation: "Generated a basic PostgreSQL query for sales by brand analysis.",
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) as total_revenue FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC LIMIT 5;",
+          explanation: "Generated a basic PostgreSQL query for revenue analysis using invoice_history table.",
         confidence: 0.7,
         suggestedVisualization: "bar"
       };
@@ -227,27 +227,40 @@ export class DataSculptAPI {
   // Get dashboard data
   static async getDashboardData(): Promise<DashboardData> {
     try {
-      console.log('Fetching real dashboard data from PostgreSQL...')
+      console.log(`Fetching dashboard data from ${this.currentDatabase}...`)
       
-      // Fetch real data from PostgreSQL via backend
-      const response = await fetch(`${API_BASE_URL}/dashboard-data`, {
+      // Fetch data from backend with database type parameter
+      const url = `${API_BASE_URL}/dashboard-data?type=${this.currentDatabase}`
+      console.log('Making request to:', url)
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response ok:', response.ok)
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to fetch dashboard data')
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
       const result = await response.json()
-      console.log('Real dashboard data:', result)
+      console.log(`${this.currentDatabase} dashboard data:`, result)
       return result
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
-      throw new Error('Failed to fetch dashboard data')
+      
+      // If it's a network error or timeout, throw a more specific error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Unable to connect to server. Please check if the backend is running on http://localhost:3001')
+      }
+      
+      throw error
     }
   }
 

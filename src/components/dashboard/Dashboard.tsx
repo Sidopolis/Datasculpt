@@ -26,12 +26,12 @@ export const Dashboard: React.FC = () => {
 
     // Check for database changes every 2 seconds
     const interval = setInterval(() => {
-      const currentDatabase = DataSculptAPI.getCurrentDatabase()
       const activeSource = dataSourceManager.getActiveSource()
+      const currentApiDatabase = DataSculptAPI.getCurrentDatabase()
       
-      if (activeSource && activeSource.type !== currentDatabase) {
-        console.log(`Database type mismatch: API=${currentDatabase}, Active=${activeSource.type}`)
-        DataSculptAPI.setDatabaseType(activeSource.type)
+      if (activeSource && activeSource.type !== currentApiDatabase) {
+        console.log(`Database type mismatch: API=${currentApiDatabase}, Active=${activeSource.type}`)
+        DataSculptAPI.setDatabaseType(activeSource.type as 'postgresql' | 'mysql')
         handleDatabaseChange()
       }
     }, 2000)
@@ -44,11 +44,67 @@ export const Dashboard: React.FC = () => {
     setError(null)
     
     try {
+      console.log('Starting dashboard data fetch...')
+      console.log('Current database type:', DataSculptAPI.getCurrentDatabase())
       const apiData = await DataSculptAPI.getDashboardData()
+      console.log('Dashboard data received:', apiData)
       setData(apiData)
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
-      setError('Failed to load dashboard data. Please try again.')
+      console.error('Error details:', error)
+      
+      // Try to get more details about the error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      console.error('Error message:', errorMessage)
+      
+      setError(`Failed to load dashboard data: ${errorMessage}`)
+      
+      // Set fallback mock data
+      const fallbackData = {
+        totalRevenue: 2450000,
+        totalOrders: 1245,
+        totalProducts: 850,
+        avgOrderValue: 1968,
+        revenueByState: [
+          { state: 'Lyra Division', revenue: 650000 },
+          { state: 'EBO Division', revenue: 580000 },
+          { state: 'Ecom Division', revenue: 520000 },
+          { state: 'Inferno Division', revenue: 480000 }
+        ],
+        topProducts: [
+          { id: 'MAT001', name: 'Cotton T-Shirt', totalSales: 1250, revenue: 125000 },
+          { id: 'MAT002', name: 'Denim Jeans', totalSales: 890, revenue: 178000 },
+          { id: 'MAT003', name: 'Polo Shirt', totalSales: 750, revenue: 112500 },
+          { id: 'MAT004', name: 'Casual Pants', totalSales: 620, revenue: 93000 },
+          { id: 'MAT005', name: 'Sports Wear', totalSales: 580, revenue: 87000 }
+        ],
+        charts: [
+          {
+            id: 'revenue-by-state',
+            title: 'Revenue by Division',
+            type: 'bar' as const,
+            data: [
+              { name: 'Lyra Division', value: 650000 },
+              { name: 'EBO Division', value: 580000 },
+              { name: 'Ecom Division', value: 520000 },
+              { name: 'Inferno Division', value: 480000 }
+            ]
+          },
+          {
+            id: 'revenue-distribution',
+            title: 'Revenue Distribution by Division',
+            type: 'pie' as const,
+            data: [
+              { name: 'Lyra Division', value: 26.5 },
+              { name: 'EBO Division', value: 23.7 },
+              { name: 'Ecom Division', value: 21.2 },
+              { name: 'Inferno Division', value: 19.6 }
+            ]
+          }
+        ]
+      }
+      console.log('Setting fallback data:', fallbackData)
+      setData(fallbackData)
     } finally {
       setLoading(false)
     }

@@ -15,38 +15,61 @@ export async function callBedrockMySQL(prompt: string) {
   try {
     const systemPrompt = `You are an AI assistant that generates MySQL queries for business analytics for LUX Industries. 
     
-    DATABASE SCHEMA (lux_industries database):
-    - brands (brand_id INT, brand_name VARCHAR(100))
-    - categories (category_id INT, category_name VARCHAR(100))
-    - products (product_id INT, product_name VARCHAR(200), brand_id INT, category_id INT, price DECIMAL(10,2))
-    - inventory (product_id INT, stock_quantity INT)
-    - sales (sale_id INT, product_id INT, quantity_sold INT, sale_date DATE, total_price DECIMAL(10,2))
+    DATABASE SCHEMA (MySQL - lux_industries database):
+    - customer_master (cust_code, full_name, city, state_desc, mobile, email, agent_code, agent_name, sales_org, dist_channel)
+    - agent_master (agent_code, agent_name, mobile, email, city, state_desc, account_group)
+    - employee_master (employee_code, employee_name, mobile, email, city, state_desc, account_group)
+    - invoice_history (bill_no, item_no, com_code, sales_org, invoice_qty, net_value_inr, net_value_fr, material_number, material_desc, division, division_name, plant, plant_name, bill_date, cust_code, customer_name, distribution_channel, bill_type)
+    - invoice_history2 (same structure as invoice_history)
+    - invoice_line_item_with_cogs (bill_no, bill_item_no, sales_org, distribution_channel, bill_date, customer_code, material_no, material_desc, before_tax_amount, cogs_value, business_area, profit_center)
+    - cancel_invoice_summary (bill_number, customer_code, customer_name, com_code, sales_org, bill_type, bill_date, bill_amnt_inr, tax_amnt, state_code, state_name)
+    - customer_overall_outstanding_report (cust_code, cust_name, lyra, ebo, ecom, inferno, nitro, rainwear, venus, on_account, export, above_90_days)
+    - company_sales_org (com_code, com_desc, sales_org, sales_org_desc)
+    - company_business_area (com_code, business_area, business_area_desc, plant, plant_desc)
+    
+    IMPORTANT: There is NO 'sales' table. All sales/transaction data is in 'invoice_history' table.
     
     RELATIONSHIPS:
-    - products.brand_id -> brands.brand_id
-    - products.category_id -> categories.category_id
-    - inventory.product_id -> products.product_id
-    - sales.product_id -> products.product_id
+    - customer_master.cust_code -> invoice_history.cust_code
+    - customer_master.agent_code -> agent_master.agent_code
+    - invoice_history.bill_no -> invoice_line_item_with_cogs.bill_no
+    - invoice_history.com_code -> company_sales_org.com_code
+    - invoice_history.sales_org -> company_sales_org.sales_org
+    
+    KEY BUSINESS ENTITIES:
+    - Divisions: Lyra, EBO, Ecom, Inferno, Nitro, Rainwear, Venus
+    - Revenue fields: net_value_inr, bill_amnt_inr, before_tax_amount
+    - Quantity fields: invoice_qty, bill_qty
+    - Date fields: bill_date, created_at
+    
+    SALES QUERIES MAPPING:
+    - "sales data" -> use invoice_history table
+    - "sales in January 2025" -> WHERE DATE_FORMAT(bill_date, '%Y-%m') = '2025-01'
+    - "revenue/sales" -> SUM(net_value_inr)
+    - "products" -> material_desc
+    - "customers" -> customer_name
+    - "brands/divisions" -> division_name
     
     TASK: Convert natural language queries into MySQL queries that:
-    1. Use proper MySQL syntax (not PostgreSQL)
+    1. Use proper MySQL syntax
     2. Include appropriate JOINs when needed
     3. Use aggregation functions (SUM, COUNT, AVG, GROUP BY)
     4. Return meaningful business insights for LUX Industries
-    5. Focus on sales, products, brands, categories, and inventory analysis
-    6. Use MySQL-specific functions like DATE_FORMAT, YEAR, MONTH, etc.
+    5. Focus on sales, revenue, customers, agents, divisions, and materials analysis
+    6. Use DATE_FORMAT for date grouping (e.g., DATE_FORMAT(bill_date, '%Y-%m') for monthly)
+    7. NEVER reference a 'sales' table - always use 'invoice_history'
     
     MYSQL-SPECIFIC FEATURES:
-    - Use DATE_FORMAT(sale_date, '%Y-%m') for month grouping
-    - Use YEAR(sale_date) and MONTH(sale_date) for date extraction
+    - Use DATE_FORMAT(bill_date, '%Y-%m') for month grouping
+    - Use YEAR(bill_date) and MONTH(bill_date) for date extraction
     - Use IFNULL() instead of COALESCE()
     - Use LIMIT instead of FETCH FIRST
     - Use MySQL date functions for time-based queries
     
     VISUALIZATION GUIDELINES:
-    - "bar": for comparing categories (sales by brand, top products, revenue by category)
+    - "bar": for comparing categories (sales by division, top materials, revenue by customer)
     - "line": for time series data (sales trends, revenue over time, monthly growth)
-    - "pie": for showing proportions (brand distribution, category sales, market share)
+    - "pie": for showing proportions (division distribution, customer sales share)
     - "area": for cumulative data over time
     
     RESPONSE FORMAT: Return ONLY valid JSON with these fields:
@@ -88,36 +111,43 @@ export async function callBedrockMySQL(prompt: string) {
     
     if (lowerQuery.includes('month') || lowerQuery.includes('trend') || lowerQuery.includes('time')) {
       return {
-        sqlQuery: "SELECT DATE_FORMAT(sale_date, '%Y-%m') AS month, SUM(total_price) AS total_sales FROM sales GROUP BY DATE_FORMAT(sale_date, '%Y-%m') ORDER BY month;",
-        explanation: "Generated a MySQL query for monthly sales trend analysis.",
+        sqlQuery: "SELECT DATE_FORMAT(bill_date, '%Y-%m') AS month, SUM(net_value_inr) AS total_sales FROM invoice_history WHERE bill_date IS NOT NULL GROUP BY DATE_FORMAT(bill_date, '%Y-%m') ORDER BY month;",
+        explanation: "Generated a MySQL query for monthly sales trend analysis from invoice history.",
         confidence: 0.8,
         suggestedVisualization: "line"
       }
-    } else if (lowerQuery.includes('product') || lowerQuery.includes('top')) {
+    } else if (lowerQuery.includes('division') || lowerQuery.includes('brand')) {
       return {
-        sqlQuery: "SELECT p.product_name, SUM(s.quantity_sold) AS total_units_sold, SUM(s.total_price) AS total_revenue FROM sales s JOIN products p ON s.product_id = p.product_id GROUP BY p.product_name ORDER BY total_units_sold DESC LIMIT 5;",
-        explanation: "Generated a MySQL query for top products analysis.",
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) AS total_revenue, COUNT(DISTINCT bill_no) AS total_orders FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC;",
+        explanation: "Generated a MySQL query for division-wise revenue analysis.",
         confidence: 0.8,
         suggestedVisualization: "bar"
       }
-    } else if (lowerQuery.includes('stock') || lowerQuery.includes('inventory')) {
+    } else if (lowerQuery.includes('customer') || lowerQuery.includes('top')) {
       return {
-        sqlQuery: "SELECT p.product_name, b.brand_name, c.category_name, i.stock_quantity FROM inventory i JOIN products p ON i.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id JOIN categories c ON p.category_id = c.category_id ORDER BY i.stock_quantity ASC;",
-        explanation: "Generated a MySQL query for current inventory status.",
+        sqlQuery: "SELECT customer_name, SUM(net_value_inr) AS total_revenue, COUNT(DISTINCT bill_no) AS total_orders FROM invoice_history WHERE customer_name IS NOT NULL GROUP BY customer_name ORDER BY total_revenue DESC LIMIT 10;",
+        explanation: "Generated a MySQL query for top customers by revenue.",
+        confidence: 0.8,
+        suggestedVisualization: "bar"
+      }
+    } else if (lowerQuery.includes('material') || lowerQuery.includes('product')) {
+      return {
+        sqlQuery: "SELECT material_desc, SUM(invoice_qty) AS total_quantity, SUM(net_value_inr) AS total_revenue FROM invoice_history WHERE material_desc IS NOT NULL GROUP BY material_desc ORDER BY total_revenue DESC LIMIT 10;",
+        explanation: "Generated a MySQL query for top materials/products by revenue.",
         confidence: 0.8,
         suggestedVisualization: "bar"
       }
     } else if (lowerQuery.includes('pie') || lowerQuery.includes('proportion')) {
       return {
-        sqlQuery: "SELECT b.brand_name, SUM(s.total_price) AS total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC;",
-        explanation: "Generated a MySQL query for brand-wise sales distribution.",
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) AS total_sales FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_sales DESC;",
+        explanation: "Generated a MySQL query for division-wise sales distribution.",
         confidence: 0.8,
         suggestedVisualization: "pie"
       }
     } else {
       return {
-        sqlQuery: "SELECT b.brand_name, SUM(s.total_price) AS total_sales, SUM(s.quantity_sold) AS total_units_sold FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC;",
-        explanation: "Generated a MySQL query for brand-wise performance analysis.",
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) AS total_revenue, SUM(invoice_qty) AS total_quantity, COUNT(DISTINCT bill_no) AS total_orders FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC;",
+        explanation: "Generated a MySQL query for comprehensive division performance analysis.",
         confidence: 0.7,
         suggestedVisualization: "bar"
       }
@@ -125,12 +155,45 @@ export async function callBedrockMySQL(prompt: string) {
   }
   } catch (error) {
     console.error('Error calling Bedrock MySQL:', error)
-    // Return a basic fallback response
-    return {
-      sqlQuery: "SELECT b.brand_name, SUM(s.total_price) AS total_sales FROM sales s JOIN products p ON s.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id GROUP BY b.brand_name ORDER BY total_sales DESC LIMIT 5;",
-      explanation: "Generated a basic MySQL query for sales by brand analysis.",
-      confidence: 0.7,
-      suggestedVisualization: "bar"
+    
+    // Return a working fallback based on query type
+    const lowerQuery = prompt.toLowerCase()
+    
+    if (lowerQuery.includes('january') && lowerQuery.includes('2025')) {
+      return {
+        sqlQuery: "SELECT DATE_FORMAT(bill_date, '%Y-%m-%d') as date, SUM(net_value_inr) as daily_sales, COUNT(DISTINCT bill_no) as orders FROM invoice_history WHERE DATE_FORMAT(bill_date, '%Y-%m') = '2025-01' GROUP BY DATE_FORMAT(bill_date, '%Y-%m-%d') ORDER BY date;",
+        explanation: "Generated a MySQL query for daily sales in January 2025 from invoice history.",
+        confidence: 0.9,
+        suggestedVisualization: "line"
+      }
+    } else if (lowerQuery.includes('sale') && (lowerQuery.includes('january') || lowerQuery.includes('jan'))) {
+      return {
+        sqlQuery: "SELECT DATE_FORMAT(bill_date, '%Y-%m') as month, SUM(net_value_inr) as total_sales, COUNT(DISTINCT bill_no) as total_orders FROM invoice_history WHERE DATE_FORMAT(bill_date, '%Y-%m') = '2025-01' GROUP BY DATE_FORMAT(bill_date, '%Y-%m');",
+        explanation: "Generated a MySQL query for total sales in January 2025 from invoice history.",
+        confidence: 0.9,
+        suggestedVisualization: "bar"
+      }
+    } else if (lowerQuery.includes('month') || lowerQuery.includes('trend') || lowerQuery.includes('time')) {
+      return {
+        sqlQuery: "SELECT DATE_FORMAT(bill_date, '%Y-%m') AS month, SUM(net_value_inr) AS total_sales FROM invoice_history WHERE bill_date IS NOT NULL GROUP BY DATE_FORMAT(bill_date, '%Y-%m') ORDER BY month;",
+        explanation: "Generated a MySQL query for monthly sales trend analysis from invoice history.",
+        confidence: 0.8,
+        suggestedVisualization: "line"
+      }
+    } else if (lowerQuery.includes('division') || lowerQuery.includes('brand')) {
+      return {
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) AS total_revenue, COUNT(DISTINCT bill_no) AS total_orders FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC;",
+        explanation: "Generated a MySQL query for division-wise revenue analysis.",
+        confidence: 0.8,
+        suggestedVisualization: "bar"
+      }
+    } else {
+      return {
+        sqlQuery: "SELECT division_name, SUM(net_value_inr) AS total_revenue, SUM(invoice_qty) AS total_quantity, COUNT(DISTINCT bill_no) AS total_orders FROM invoice_history WHERE division_name IS NOT NULL GROUP BY division_name ORDER BY total_revenue DESC;",
+        explanation: "Generated a MySQL query for comprehensive division performance analysis.",
+        confidence: 0.7,
+        suggestedVisualization: "bar"
+      }
     }
   }
 } 

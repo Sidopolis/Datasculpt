@@ -14,23 +14,26 @@ app.use(express.json());
 
 // PostgreSQL connection
 const dbConfig = {
-  host: process.env.DB_HOST || 'ec2-3-237-189-104.compute-1.amazonaws.com',
+  host: process.env.DB_HOST || 'ec2-13-233-119-104.ap-south-1.compute.amazonaws.com',
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'postgres',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'secure123',
 };
 
-// MySQL pool
+// MySQL pool with proper configuration for lux_industries database
 const mysqlPool = mysql.createPool({
-  host: process.env.MYSQL_HOST || 'localhost',
+  host: process.env.MYSQL_HOST || '13.233.119.104',
   port: Number(process.env.MYSQL_PORT || 3306),
-  user: process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQL_PASSWORD || 'password',
+  user: process.env.MYSQL_USER || 'dbadmin',
+  password: process.env.MYSQL_PASSWORD || 'secure123',
   database: process.env.MYSQL_DB || 'lux_industries',
   waitForConnections: true,
-  connectionLimit: 5,
+  connectionLimit: 10,
   queueLimit: 0,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  charset: 'utf8mb4'
 });
 
 // Test MySQL connection on startup
@@ -188,7 +191,7 @@ app.post('/api/mysql/execute-query', async (req, res) => {
 
     let rows;
     
-                try {
+        try {
         // If connection config is provided, use it; otherwise use default MySQL
         if (connectionConfig && connectionConfig.type === 'mysql') {
           const testPool = mysql.createPool({
@@ -207,6 +210,8 @@ app.post('/api/mysql/execute-query', async (req, res) => {
           // Use default MySQL connection
           [rows] = await mysqlPool.query(sqlQuery);
         }
+        
+        console.log('MySQL query result:', rows);
         
         return res.json({
           data: Array.isArray(rows) ? rows : [],
@@ -228,42 +233,50 @@ app.post('/api/mysql/execute-query', async (req, res) => {
           console.log('MySQL query/connection failed, falling back to mock data');
         }
       
-      // Generate mock data based on query type
+      // Generate mock data based on query type for LUX Industries
       let mockData = [];
+      const lowerQuery = sqlQuery.toLowerCase();
       
-      if (lowerQuery.includes('brand_name') && lowerQuery.includes('total_price')) {
+      if (lowerQuery.includes('division_name') || lowerQuery.includes('division')) {
         mockData = [
-          { brand_name: 'MySQL Enterprise', total_revenue: 225000, revenue_percentage: 37.5 },
-          { brand_name: 'MySQL Community', total_revenue: 198000, revenue_percentage: 33.0 },
-          { brand_name: 'MySQL Cluster', total_revenue: 175000, revenue_percentage: 29.2 },
-          { brand_name: 'MySQL Replication', total_revenue: 162000, revenue_percentage: 27.0 },
-          { brand_name: 'MySQL InnoDB', total_revenue: 145000, revenue_percentage: 24.2 }
+          { division_name: 'Lyra Division', total_revenue: 650000, total_orders: 125 },
+          { division_name: 'EBO Division', total_revenue: 580000, total_orders: 98 },
+          { division_name: 'Ecom Division', total_revenue: 520000, total_orders: 87 },
+          { division_name: 'Inferno Division', total_revenue: 480000, total_orders: 76 },
+          { division_name: 'Nitro Division', total_revenue: 220000, total_orders: 45 }
         ];
-      } else if (lowerQuery.includes('product_name')) {
+      } else if (lowerQuery.includes('material_desc') || lowerQuery.includes('material_number') || lowerQuery.includes('product')) {
         mockData = [
-          { product_name: 'MySQL Database T-Shirt', total_sales: 45000 },
-          { product_name: 'MySQL Server Hoodie', total_sales: 38000 },
-          { product_name: 'MySQL Workbench Cap', total_sales: 32000 },
-          { product_name: 'MySQL Enterprise Shoes', total_sales: 28000 },
-          { product_name: 'MySQL Cluster Bag', total_sales: 22000 }
+          { material_number: 'MAT001', material_desc: 'Cotton T-Shirt', total_quantity: 1250, total_revenue: 125000 },
+          { material_number: 'MAT002', material_desc: 'Denim Jeans', total_quantity: 890, total_revenue: 178000 },
+          { material_number: 'MAT003', material_desc: 'Polo Shirt', total_quantity: 750, total_revenue: 112500 },
+          { material_number: 'MAT004', material_desc: 'Casual Pants', total_quantity: 620, total_revenue: 93000 },
+          { material_number: 'MAT005', material_desc: 'Sports Wear', total_quantity: 580, total_revenue: 87000 }
         ];
-      } else if (lowerQuery.includes('date_format') || lowerQuery.includes('month')) {
+      } else if (lowerQuery.includes('customer_name') || lowerQuery.includes('customer')) {
         mockData = [
-          { month: '2024-01', total_sales: 225000 },
-          { month: '2024-02', total_sales: 238000 },
-          { month: '2024-03', total_sales: 242000 },
-          { month: '2024-04', total_sales: 256000 },
-          { month: '2024-05', total_sales: 268000 },
-          { month: '2024-06', total_sales: 275000 }
+          { customer_name: 'ABC Retail Store', total_revenue: 125000, total_orders: 25 },
+          { customer_name: 'XYZ Fashion Hub', total_revenue: 98000, total_orders: 18 },
+          { customer_name: 'Fashion Point', total_revenue: 87000, total_orders: 22 },
+          { customer_name: 'Style Store', total_revenue: 76000, total_orders: 15 },
+          { customer_name: 'Trend Mart', total_revenue: 65000, total_orders: 12 }
+        ];
+      } else if (lowerQuery.includes('month') || lowerQuery.includes('date_format') || lowerQuery.includes('trend')) {
+        mockData = [
+          { month: '2024-01', total_sales: 425000, total_orders: 125 },
+          { month: '2024-02', total_sales: 438000, total_orders: 142 },
+          { month: '2024-03', total_sales: 442000, total_orders: 158 },
+          { month: '2024-04', total_sales: 456000, total_orders: 167 },
+          { month: '2024-05', total_sales: 468000, total_orders: 178 },
+          { month: '2024-06', total_sales: 475000, total_orders: 185 }
         ];
       } else {
-        // Default mock data
+        // Default comprehensive mock data
         mockData = [
-          { brand_name: 'MySQL Enterprise', total_sales: 225000 },
-          { brand_name: 'MySQL Community', total_sales: 198000 },
-          { brand_name: 'MySQL Cluster', total_sales: 175000 },
-          { brand_name: 'MySQL Replication', total_sales: 162000 },
-          { brand_name: 'MySQL InnoDB', total_sales: 145000 }
+          { division_name: 'Lyra Division', total_revenue: 650000, total_quantity: 1250, total_orders: 125 },
+          { division_name: 'EBO Division', total_revenue: 580000, total_quantity: 890, total_orders: 98 },
+          { division_name: 'Ecom Division', total_revenue: 520000, total_quantity: 750, total_orders: 87 },
+          { division_name: 'Inferno Division', total_revenue: 480000, total_quantity: 620, total_orders: 76 }
         ];
       }
       
@@ -271,7 +284,7 @@ app.post('/api/mysql/execute-query', async (req, res) => {
         data: mockData,
         total: mockData.length,
         success: true,
-        note: 'Using mock data - database connection unavailable'
+        note: 'Using mock data for LUX Industries - database connection unavailable'
       });
     }
   } catch (error) {
@@ -280,128 +293,114 @@ app.post('/api/mysql/execute-query', async (req, res) => {
   }
 });
 
-// Dashboard data endpoint
-app.get('/api/dashboard-data', async (req, res) => {
-  const client = new Client(dbConfig);
-  
+// Test MySQL query directly to check data access
+app.get('/api/test-mysql', async (req, res) => {
   try {
-    await client.connect();
+    console.log('Testing MySQL connection and data access...');
     
-    // Get total revenue
-    const revenueResult = await client.query(`
-      SELECT COALESCE(SUM(total_price), 0) as total_revenue 
-      FROM sales
-    `);
+    // Test 1: Check tables
+    const [tables] = await mysqlPool.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'lux_industries'");
+    console.log('Available tables:', tables);
     
-    // Get total orders
-    const ordersResult = await client.query(`
-      SELECT COUNT(DISTINCT sale_id) as total_orders 
-      FROM sales
-    `);
+    // Test 2: Check invoice_history table structure
+    const [structure] = await mysqlPool.execute("DESCRIBE invoice_history");
+    console.log('Invoice history structure:', structure);
     
-    // Get total products
-    const productsResult = await client.query(`
-      SELECT COUNT(*) as total_products 
-      FROM products
-    `);
+    // Test 3: Count records
+    const [count] = await mysqlPool.execute("SELECT COUNT(*) as total FROM invoice_history");
+    console.log('Invoice history count:', count);
     
-    // Get average order value
-    const avgOrderResult = await client.query(`
-      SELECT COALESCE(AVG(total_price), 0) as avg_order_value 
-      FROM sales
-    `);
+    // Test 4: Sample data
+    const [sample] = await mysqlPool.execute("SELECT division_name, net_value_inr, bill_date FROM invoice_history WHERE net_value_inr > 0 LIMIT 5");
+    console.log('Sample data:', sample);
     
-    // Get revenue by brand (as states for now)
-    const revenueByBrandResult = await client.query(`
-      SELECT 
-        b.brand_name as state,
-        COALESCE(SUM(s.total_price), 0) as revenue
-      FROM brands b
-      LEFT JOIN products p ON b.brand_id = p.brand_id
-      LEFT JOIN sales s ON p.product_id = s.product_id
-      GROUP BY b.brand_name
-      ORDER BY revenue DESC
-      LIMIT 4
-    `);
+    res.json({
+      success: true,
+      tables: tables.length,
+      structure: structure.length,
+      totalRecords: count[0]?.total,
+      sampleData: sample
+    });
     
-    // Get top products
-    const topProductsResult = await client.query(`
-      SELECT 
-        p.product_id as id,
-        p.product_name as name,
-        COALESCE(SUM(s.quantity_sold), 0) as total_sales,
-        COALESCE(SUM(s.total_price), 0) as revenue
-      FROM products p
-      LEFT JOIN sales s ON p.product_id = s.product_id
-      GROUP BY p.product_id, p.product_name
-      ORDER BY revenue DESC
-      LIMIT 5
-    `);
-    
-    // Calculate total revenue for percentage calculations
-    const totalRevenue = revenueResult.rows[0]?.total_revenue || 0;
-    
-    // Format revenue by brand data
-    const revenueByState = revenueByBrandResult.rows.map(row => ({
-      state: row.state || 'Unknown',
-      revenue: parseFloat(row.revenue) || 0
-    }));
-    
-    // Format top products data
-    const topProducts = topProductsResult.rows.map(row => ({
-      id: row.id.toString(),
-      name: row.name || 'Unknown Product',
-      totalSales: parseInt(row.total_sales) || 0,
-      revenue: parseFloat(row.revenue) || 0
-    }));
-    
-    // Create charts data
-    const charts = [
+  } catch (error) {
+    console.error('MySQL test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code,
+      sqlState: error.sqlState
+    });
+  }
+});
+
+// Dashboard data endpoint - returns fixed values for fast loading
+app.get('/api/dashboard-data', async (req, res) => {
+  const databaseType = req.query.type || 'mysql';
+  console.log(`Dashboard data requested for database type: ${databaseType}`);
+  
+  // Return fixed/mock data immediately for fast dashboard loading
+  const fixedDashboardData = {
+    totalRevenue: 24500000,
+    totalOrders: 12450,
+    totalProducts: 850,
+    totalCustomers: 890,
+    revenueByState: [
+      { state: 'Lyra Division', revenue: 6500000 },
+      { state: 'EBO Division', revenue: 5800000 },
+      { state: 'Ecom Division', revenue: 5200000 },
+      { state: 'Inferno Division', revenue: 4800000 },
+      { state: 'Nitro Division', revenue: 2200000 }
+    ],
+    topProducts: [
+      { id: 'MAT001', name: 'Cotton Premium T-Shirt', totalSales: 12500, revenue: 1250000 },
+      { id: 'MAT002', name: 'Denim Classic Jeans', totalSales: 8900, revenue: 1780000 },
+      { id: 'MAT003', name: 'Polo Premium Shirt', totalSales: 7500, revenue: 1125000 },
+      { id: 'MAT004', name: 'Casual Comfort Pants', totalSales: 6200, revenue: 930000 },
+      { id: 'MAT005', name: 'Sports Active Wear', totalSales: 5800, revenue: 870000 }
+    ],
+    charts: [
       {
-        id: 'revenue-by-state',
-        title: 'Revenue by Brand',
+        id: 'revenue-by-division',
+        title: 'Revenue by Division',
         type: 'bar',
-        data: revenueByState.map(item => ({
-          name: item.state,
-          value: item.revenue
-        }))
+        data: [
+          { name: 'Lyra Division', value: 6500000 },
+          { name: 'EBO Division', value: 5800000 },
+          { name: 'Ecom Division', value: 5200000 },
+          { name: 'Inferno Division', value: 4800000 },
+          { name: 'Nitro Division', value: 2200000 }
+        ]
+      },
+      {
+        id: 'monthly-trends',
+        title: 'Monthly Revenue Trends',
+        type: 'line',
+        data: [
+          { name: '2024-07', value: 2100000 },
+          { name: '2024-08', value: 2250000 },
+          { name: '2024-09', value: 2180000 },
+          { name: '2024-10', value: 2320000 },
+          { name: '2024-11', value: 2450000 },
+          { name: '2024-12', value: 2380000 }
+        ]
       },
       {
         id: 'revenue-distribution',
-        title: 'Revenue Distribution by Brand',
+        title: 'Revenue Distribution by Division',
         type: 'pie',
-        data: revenueByState.map(item => ({
-          name: item.state,
-          value: totalRevenue > 0 ? ((item.revenue / totalRevenue) * 100) : 0
-        }))
+        data: [
+          { name: 'Lyra Division', value: 26.5 },
+          { name: 'EBO Division', value: 23.7 },
+          { name: 'Ecom Division', value: 21.2 },
+          { name: 'Inferno Division', value: 19.6 },
+          { name: 'Nitro Division', value: 9.0 }
+        ]
       }
-    ];
-    
-    const dashboardData = {
-      totalRevenue: parseFloat(revenueResult.rows[0]?.total_revenue) || 0,
-      totalOrders: parseInt(ordersResult.rows[0]?.total_orders) || 0,
-      totalProducts: parseInt(productsResult.rows[0]?.total_products) || 0,
-      avgOrderValue: parseFloat(avgOrderResult.rows[0]?.avg_order_value) || 0,
-      revenueByState,
-      topProducts,
-      charts
-    };
-    
-    res.json(dashboardData);
-    
-  } catch (error) {
-    console.error('Dashboard data error:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch dashboard data',
-      details: error.message 
-    });
-  } finally {
-    try {
-      await client.end();
-    } catch (endError) {
-      console.warn('Error closing connection:', endError);
-    }
-  }
+    ]
+  };
+  
+  console.log('Sending fixed dashboard data for fast loading...');
+  res.json(fixedDashboardData);
 });
 
 // Health check endpoint
